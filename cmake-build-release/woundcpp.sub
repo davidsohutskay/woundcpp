@@ -1,0 +1,12 @@
+#!/bin/bash
+# FILENAME:  woundcpp.sub
+#SBATCH -A abuganza
+#SBATCH --nodes=1
+#SBATCH --ntasks=24
+#SBATCH --time=96:00:00
+
+# Loads tools and sets the application up
+# Change to the directory
+
+export OMP_NUM_THREADS=24
+./woundcpp3D
