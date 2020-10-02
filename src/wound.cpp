@@ -92,8 +92,12 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 	//std::cout<<"read all global parameters\n";
 	//
 	//---------------------------------//
-	
-	
+
+    // voigt table
+    Vector3d voigt_table_I_i(0,1,0);
+    Vector3d voigt_table_I_j(0,1,1);
+    Vector3d voigt_table_J_k(0,1,0);
+    Vector3d voigt_table_J_l(0,1,1);
 	
 	//---------------------------------//
 	// GLOBAL VARIABLES
@@ -248,11 +252,13 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		//---------------------------------//
 		// LOCAL NEWTON: structural problem
 		//
-		VectorXd dThetadCC(24);dThetadCC.setZero();
+        VectorXd dThetadCC(18);dThetadCC.setZero();
+		//VectorXd dThetadCC(24);dThetadCC.setZero();
 		VectorXd dThetadrho(6);dThetadrho.setZero();
 		VectorXd dThetadc(6);dThetadc.setZero();
 		//std::cout<<"Local variables before update:\nphif0 = "<<ip_phif_0[ip]<<"\nkappa_0 = "<<ip_kappa_0[ip]<<"\na0_0 = ["<<ip_a0_0[ip](0)<<","<<ip_a0_0[ip](1)<<"]\nlamdaP_0 = ["<<ip_lamdaP_0[ip](0)<<","<<ip_lamdaP_0[ip](1)<<"]\n";
-		localWoundProblem(dt,local_parameters,c,rho,CC,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
+		//localWoundProblem(dt,local_parameters,c,rho,CC,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
+        localWoundProblemExplicit(dt,local_parameters,c,rho,FF,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
 		//
 		// rename variables to make it easier to track
 		double phif_0 = ip_phif_0[ip];
@@ -275,37 +281,55 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		a0 = a0/(sqrt(a0.dot(a0)));
 		//
 		// unpack the derivatives wrt CC
-		// remember dThetatCC: 4 phi, 4 a0x, 4 a0y, 4 kappa, 4 lamdaPa, 4 lamdaPs
-		Matrix2d dphifdCC; dphifdCC.setZero();
-		dphifdCC(0,0) = dThetadCC(0);
-		dphifdCC(0,1) = dThetadCC(1);
-		dphifdCC(1,0) = dThetadCC(2);
-		dphifdCC(1,1) = dThetadCC(3);
-		Matrix2d da0xdCC;da0xdCC.setZero();
-		da0xdCC(0,0) = dThetadCC(4);
-		da0xdCC(0,1) = dThetadCC(5);
-		da0xdCC(1,0) = dThetadCC(6);
-		da0xdCC(1,1) = dThetadCC(7);
-		Matrix2d da0ydCC;da0ydCC.setZero();
-		da0ydCC(0,0) = dThetadCC(8);
-		da0ydCC(0,1) = dThetadCC(9);
-		da0ydCC(1,0) = dThetadCC(10);
-		da0ydCC(1,1) = dThetadCC(11);
-		Matrix2d dkappadCC; dkappadCC.setZero();
-		dkappadCC(0,0) = dThetadCC(12);
-		dkappadCC(0,1) = dThetadCC(13);
-		dkappadCC(1,0) = dThetadCC(14);
-		dkappadCC(1,1) = dThetadCC(15);
+        Matrix2d dphifdCC; dphifdCC.setZero();
+        Matrix2d da0xdCC;da0xdCC.setZero();
+        Matrix2d da0ydCC;da0ydCC.setZero();
+        Matrix2d dkappadCC; dkappadCC.setZero();
         Matrix2d dlamdaP_adCC; dlamdaP_adCC.setZero();
-        dlamdaP_adCC(0,0) = dThetadCC(16);
-        dlamdaP_adCC(0,1) = dThetadCC(17);
-        dlamdaP_adCC(1,0) = dThetadCC(18);
-        dlamdaP_adCC(1,1) = dThetadCC(19);
         Matrix2d dlamdaP_sdCC; dlamdaP_sdCC.setZero();
-        dlamdaP_sdCC(0,0) = dThetadCC(20);
-        dlamdaP_sdCC(0,1) = dThetadCC(21);
-        dlamdaP_sdCC(1,0) = dThetadCC(22);
-        dlamdaP_sdCC(1,1) = dThetadCC(23);
+		// remember dThetatCC: 4 phi, 4 a0x, 4 a0y, 4 kappa, 4 lamdaPa, 4 lamdaPs
+//		dphifdCC(0,0) = dThetadCC(0);
+//		dphifdCC(0,1) = dThetadCC(1);
+//		dphifdCC(1,0) = dThetadCC(2);
+//		dphifdCC(1,1) = dThetadCC(3);
+//		da0xdCC(0,0) = dThetadCC(4);
+//		da0xdCC(0,1) = dThetadCC(5);
+//		da0xdCC(1,0) = dThetadCC(6);
+//		da0xdCC(1,1) = dThetadCC(7);
+//		da0ydCC(0,0) = dThetadCC(8);
+//		da0ydCC(0,1) = dThetadCC(9);
+//		da0ydCC(1,0) = dThetadCC(10);
+//		da0ydCC(1,1) = dThetadCC(11);
+//		dkappadCC(0,0) = dThetadCC(12);
+//		dkappadCC(0,1) = dThetadCC(13);
+//		dkappadCC(1,0) = dThetadCC(14);
+//		dkappadCC(1,1) = dThetadCC(15);
+//        dlamdaP_adCC(0,0) = dThetadCC(16);
+//        dlamdaP_adCC(0,1) = dThetadCC(17);
+//        dlamdaP_adCC(1,0) = dThetadCC(18);
+//        dlamdaP_adCC(1,1) = dThetadCC(19);
+//        dlamdaP_sdCC(0,0) = dThetadCC(20);
+//        dlamdaP_sdCC(0,1) = dThetadCC(21);
+//        dlamdaP_sdCC(1,0) = dThetadCC(22);
+//        dlamdaP_sdCC(1,1) = dThetadCC(23);
+        for (int II=0; II<3; II++){
+            int ii = voigt_table_I_i(II);
+            int jj = voigt_table_I_j(II);
+            dphifdCC(ii,jj) = dThetadCC(0+II);
+            da0xdCC(ii,jj) = dThetadCC(3+II);
+            da0ydCC(ii,jj) = dThetadCC(6+II);
+            dkappadCC(ii,jj) = dThetadCC(9+II);
+            dlamdaP_adCC(ii,jj) = dThetadCC(12+II);
+            dlamdaP_sdCC(ii,jj) = dThetadCC(15+II);
+            if(ii!=jj){
+                dphifdCC(jj,ii) = dThetadCC(0+II);
+                da0xdCC(jj,ii) = dThetadCC(3+II);
+                da0ydCC(jj,ii) = dThetadCC(6+II);
+                dkappadCC(jj,ii) = dThetadCC(9+II);
+                dlamdaP_adCC(jj,ii) = dThetadCC(12+II);
+                dlamdaP_sdCC(jj,ii) = dThetadCC(15+II);
+            }
+        }
 		// unpack the derivatives wrt rho
 		double dphifdrho = dThetadrho(0);
 		double da0xdrho  = dThetadrho(1);
@@ -387,9 +411,9 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		Vector3d SS_voigt = Vector3d(SS(0,0),SS(1,1),SS(0,1));
 		// Flux and Source terms for the rho and the C
 		//Vector2d Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
-		//Vector2d Q_c = -D_cc*CCinv*Grad_c;
+		Vector2d Q_c = -D_cc*CCinv*Grad_c;
         Vector2d Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
-        Vector2d Q_c = -D_cc*CCinv*Grad_c;
+        //Vector2d Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
 		// mechanosensing 
 		double He = 1./(1.+exp(-gamma_theta*(thetaE - vartheta_e)));
 		double S_rho = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho)*rho - d_rho*rho;
@@ -556,11 +580,6 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		}		
 		//--------------------------------------------------//		
 		// build DD, the voigt version of CCCC = dSS_dCC
-		// voigt table
-		Vector3d voigt_table_I_i(0,1,0);
-		Vector3d voigt_table_I_j(0,1,1);
-		Vector3d voigt_table_J_k(0,1,0);
-		Vector3d voigt_table_J_l(0,1,1);
 		// some things needed first
 		// only derivatives with respect to CC explicitly
 		Matrix2d dthetadCC = 0.5*theta*CCinv;	
@@ -707,8 +726,8 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
                         dQ_rhodCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0(ii,jj)*Grad_rho(jj)
                                                                   - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0(ii,jj)*Grad_c(jj))*dtrAdCC(kk,ll) / (trA*trA);
 
-                        //dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_cc-phif*(D_cc-D_cc/10))*A0(ii,jj)*Grad_c(jj))
-                         //                                 *dtrAdCC(kk,ll)/(trA*trA);
+//                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_cc-phif*(D_cc-D_cc/10))*A0(ii,jj)*Grad_c(jj))
+//                                                          *dtrAdCC(kk,ll)/(trA*trA);
 
                         dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-0.5)*D_cc*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_c(jj);
                     }
@@ -1468,14 +1487,14 @@ VectorXd &dThetadCC, VectorXd &dThetadrho, VectorXd &dThetadc)
 		//std::cout<<"norm(RR): "<<residuum<<"\n";
 		//std::cout<<"norm(SOL): "<<normSOL<<"\n";
 		iter += 1;
-		if(normRR > 1e-4 && iter == max_local_iter){
-			std::cout<<"no local convergence\nlamda1: "<<lamda1<<", lamda0: "<<lamda0<<", lamdaP:"<<lamdaP(0)<<","<<lamdaP(1)<<",a0:"<<a0(0)<<","<<a0(1)<<"Ce_aa: "<<Ce_aa<<","<<Ce_as<<","<<Ce_ss<<"\n";
-			std::cout<<"Ce-lamda:"<<fabs(lamda1-Ce_aa)<<"\n";
-			std::cout<<"aux"<<aux00<<"\n";
-			std::cout<<"sinVartheta: "<<sinVartheta<<"\n";
-			std::cout<<"Res\n"<<RR_local<<"\nSOL_local\n"<<SOL_local<<"\n";
-			//throw std::runtime_error("sorry pal ");
-		}
+//		if(normRR > 1e-4 && iter == max_local_iter){
+//			std::cout<<"no local convergence\nlamda1: "<<lamda1<<", lamda0: "<<lamda0<<", lamdaP:"<<lamdaP(0)<<","<<lamdaP(1)<<",a0:"<<a0(0)<<","<<a0(1)<<"Ce_aa: "<<Ce_aa<<","<<Ce_as<<","<<Ce_ss<<"\n";
+//			std::cout<<"Ce-lamda:"<<fabs(lamda1-Ce_aa)<<"\n";
+//			std::cout<<"aux"<<aux00<<"\n";
+//			std::cout<<"sinVartheta: "<<sinVartheta<<"\n";
+//			std::cout<<"Res\n"<<RR_local<<"\nSOL_local\n"<<SOL_local<<"\n";
+//			//throw std::runtime_error("sorry pal ");
+//		}
 		
 	} // END OF WHILE LOOP OF LOCAL NEWTON
 	//a0 = a0/sqrt(a0.dot(a0));
@@ -1667,6 +1686,560 @@ VectorXd &dThetadCC, VectorXd &dThetadrho, VectorXd &dThetadc)
 	// the tangent matrix in this case remains the same as KK_local
 	dThetadc = KK_local.lu().solve(-dRThetadc);
 
+}
+
+//========================================================//
+// EXPLICIT LOCAL PROBLEM: structural update
+//========================================================//
+void localWoundProblemExplicit(
+        double dt, const std::vector<double> &local_parameters,
+        double c,double rho,const Matrix2d &FF,
+        const double &phif_0, const Vector2d &a0_0, const double &kappa_0, const Vector2d &lamdaP_0,
+        double &phif, Vector2d &a0, double &kappa, Vector2d &lamdaP,
+        VectorXd &dThetadCC, VectorXd &dThetadrho, VectorXd &dThetadc)
+{
+    //---------------------------------//
+    //
+    // INPUT
+    // 	matParam: material parameters
+    //	rho: value of the cell density at the point
+    //	c: concentration at the point
+    //	CC: deformation at the point
+    //	Theta_t: value of the parameters at previous time step
+    //
+    // OUTPUT
+    //	Theta: value of the parameters at the current time step
+    //	dThetadCC: derivative of Theta wrt global mechanics (CC)
+    // 	dThetadrho: derivative of Theta wrt global rho
+    // 	dThetadc: derivative of Theta wrt global C
+    //
+    //---------------------------------//
+
+    //---------------------------------//
+    // Parameters
+    //
+    // collagen fraction
+    double p_phi = local_parameters[0]; // production by fibroblasts, natural rate
+    double p_phi_c = local_parameters[1]; // production up-regulation, weighted by C and rho
+    double p_phi_theta = local_parameters[2]; //production regulated by stretch
+    double K_phi_c = local_parameters[3]; // saturation of C effect on deposition
+    double K_phi_rho = local_parameters[4]; // saturation of collagen fraction itself
+    double d_phi = local_parameters[5]; // rate of degradation
+    double d_phi_rho_c = local_parameters[6]; // rate of degradation
+    //
+    // fiber alignment
+    double tau_omega = local_parameters[7]; // time constant for angular reorientation
+    //
+    // dispersion parameter
+    double tau_kappa = local_parameters[8]; // time constant
+    double gamma_kappa = local_parameters[9]; // exponent of the principal stretch ratio
+    //
+    // permanent contracture/growth
+    double tau_lamdaP_a = local_parameters[10]; // time constant for direction a
+    double tau_lamdaP_s = local_parameters[11]; // time constant for direction s
+    //
+    double gamma_theta = local_parameters[12]; // exponent of the Heaviside function
+    double vartheta_e = local_parameters[13]; // mechanosensing response
+    //
+    // solution parameters
+    double tol_local = local_parameters[14]; // local tolerance
+    double time_step_ratio = local_parameters[15]; // max local iter or time step ratio
+    //
+    // other local stuff
+    double local_dt = dt/time_step_ratio;
+    //
+    double PIE = 3.14159;
+    Matrix2d Rot90;Rot90<<0.,-1.,1.,0.;
+
+    // Use these to get at the six elements of CC that we need
+    Vector3d voigt_table_I_i(0,1,0);
+    Vector3d voigt_table_I_j(0,1,1);
+
+    //---------------------------------//
+    // KINEMATICS
+    //---------------------------------//
+    Matrix2d CC = FF.transpose()*FF;
+    Matrix2d CCinv = CC.inverse();
+    // re-compute basis a0, s0, n0. (If not always vertical, could find n0 with cross product or rotations. Be careful of sign.)
+    // fiber tensor in the reference
+    Matrix2d a0a0, s0s0;
+    // recompute split
+    Matrix2d FFg, FFginv, FFe;
+    // elastic strain
+    Matrix2d CCe, CCeinv;
+    //
+    //---------------------------------//
+
+    //---------------------------------//
+    // LOCAL EXPLICIT FORWARD-EULER ITERATION
+    //---------------------------------//
+    //
+    // Declare Variables
+    // New phi, a0x, a0y, kappa, lamdaPa, lamdaPs
+    phif = phif_0;
+    // make sure it is unit length
+    Vector2d s0 = Rot90*a0;
+    a0 = a0_0/(sqrt(a0_0.dot(a0_0)));
+    s0 = Rot90*a0;
+    kappa = kappa_0;
+    lamdaP = lamdaP_0;
+    //
+    double phif_dot, kappa_dot;
+    Vector2d lamdaP_dot, a0_dot;
+    //
+    VectorXd dThetadCC_num(18); dThetadCC_num.setZero();
+    VectorXd dThetadrho_num(6); dThetadrho_num.setZero();
+    VectorXd dThetadc_num(6); dThetadc_num.setZero();
+
+    //std::ofstream myfile;
+    //myfile.open("FE_results.csv");
+
+    for(int step=0;step<time_step_ratio;step++){
+        // Save results
+        //myfile << std::fixed << std::setprecision(10) << local_dt*step << "," << phif << "," << kappa << "," << a0(0) << "," << a0(1) << "," << lamdaP(0) << "," << lamdaP(1) << "\n";
+        //std::cout << "\n a0.dot(s0) " << a0.dot(s0) << "\n  a0.dot(n0)" << a0.dot(n0) << "\n s0.dot(n0)" << s0.dot(n0) << "\n";
+
+        // fiber tensor in the reference
+        a0a0 = a0*a0.transpose();
+        s0s0 = s0*s0.transpose();
+        // recompute split
+        FFg = lamdaP(0)*(a0a0) + lamdaP(1)*(s0s0);
+        FFginv = (1./lamdaP(0))*(a0a0) + (1./lamdaP(1))*(s0s0);
+        //Matrix2d FFe = FF*FFginv;
+        // std::cout<<"recompute the split.\nFF\n"<<FF<<"\nFg\n"<<FFg<<"\nFFe\n"<<FFe<<"\n";
+        // elastic strain
+        CCe = FFginv*CC*FFginv;
+        CCeinv = CCe.inverse();
+        // Jacobian of the deformations
+        double Jp = lamdaP(0)*lamdaP(1);
+        double Je = sqrt(CCe.determinant());
+        double J = Je*Jp;
+
+        // Eigenvalues
+        // Use .compute() for the QR algorithm, .computeDirect() for an explicit trig
+        // QR may be more accurate, but explicit is faster
+        // Eigenvalues
+        SelfAdjointEigenSolver<Matrix2d> eigensolver;
+        eigensolver.compute(CCe);
+        Vector2d lamda = eigensolver.eigenvalues();
+        Matrix2d vectors = eigensolver.eigenvectors();
+        double lamdamax = lamda(1);
+        double lamdamin = lamda(0);
+        Vector2d vectormax = vectors.col(1);
+        Vector2d vectormin = vectors.col(0);
+        if (a0.dot(vectormax) < 0) {
+            vectormax = -vectormax;
+        }
+        // If CC is the identity matrix, the eigenvectors are arbitrary which is problematic.
+        // Beware the matrix becoming singular. Need to perturb.
+        double epsilon = 1e-7;
+        double delta = 1e-7;
+        if(abs(lamdamin-lamdamax) < epsilon ){
+            lamdamax = lamdamax*(1+delta);
+            lamdamin = lamdamin*(1-delta);
+        }
+        //std::cout << "\n vectormax" << vectormax << "\n lamdaMax" << lamdamax << "\n";
+
+        // Mechanosensing
+        double He = 1./(1.+exp(-gamma_theta*(Je - vartheta_e)));
+        //if(He<0.002){He=0;}
+
+        //----------------------------//
+        // 2D FORWARD-EULER EQUATIONS
+        //----------------------------//
+        // Collagen density PHI
+        double phif_dot_plus = (p_phi + (p_phi_c*c)/(K_phi_c+c) + p_phi_theta*He)*(rho/(K_phi_rho+phif));
+        //std::cout<<"phidotplus: "<<phif_dot_plus<<"\n";
+        phif_dot = phif_dot_plus - (d_phi + c*rho*d_phi_rho_c)*phif;
+
+        // Principal direction A0
+        // Alternatively, see Menzel (NOTE THAT THE THIRD COMPONENT IS THE LARGEST ONE)
+        // a0 = a0 + local_dt*(((2.*PIE*phif_dot_plus)/(tau_omega))*lamda(2)*(Identity-a0a0)*(vectors.col(2)));
+        a0_dot = ((2.*PIE*phif_dot_plus)/(tau_omega))*lamdamax*(Matrix2d::Identity()-a0a0)*vectormax;
+
+        // Dispersion KAPPA
+        // kappa_dot = (phif_dot_plus/tau_kappa)*(pow(lamda(2)/lamda(1),gamma_kappa)/2. - kappa);
+        kappa_dot = (phif_dot_plus/tau_kappa)*(pow(lamdamin/lamdamax,gamma_kappa)/2. - kappa);
+
+        // elastic stretches of the directions a and s
+        double Ce_aa = a0.transpose()*CCe*a0;
+        double Ce_ss = s0.transpose()*CCe*s0;
+        double lamdaE_a = sqrt(Ce_aa);
+        double lamdaE_s = sqrt(Ce_ss);
+
+        // Permanent deformation LAMDAP
+        lamdaP_dot(0) = phif_dot_plus*(lamdaE_a-1)/tau_lamdaP_a;
+        lamdaP_dot(1) = phif_dot_plus*(lamdaE_s-1)/tau_lamdaP_s;
+
+        //----------------------------------------//
+        // CALCULATE GLOBAL CHAIN RULE DERIVATIVES
+        //----------------------------------------//
+
+        // Calculate derivatives of eigenvalues and eigenvectors
+        Matrix2d dCCdCC; dCCdCC.setZero();
+        Matrix3d LHS; LHS.setZero();
+        Vector3d RHS,SOL; RHS.setZero(), SOL.setZero();
+        //std::vector<Vector2d> dvectordCCe(9,Vector2d::Zero());
+        //std::vector<Vector2d> dvectordCC(9,Vector2d::Zero());
+        std::vector<Matrix2d> dvectormaxdCCe(2,Matrix2d::Zero());
+        std::vector<Matrix2d> dvectormaxdCC(2,Matrix2d::Zero());
+
+        // We actually only  need one eigenvector so an outer loop is not needed, but if we want more just change to 3.
+        // Create matrix for calculation of derivatives of eigenvalues and vectors.
+        LHS << CCe(0,0) - lamdamax, CCe(0,1), -vectormax(0),
+                CCe(1,0), CCe(1,1) - lamdamax, -vectormax(1),
+                vectormax(0), vectormax(1), 0;
+        // CC is symmetric so we actually only need 6 components.
+        //std::cout<<"\n"<<MM<<"\n"<<MM.determinant()<<"\n";
+        for (int ii=0; ii<2; ii++){
+            for (int jj=0; jj<2; jj++) {
+                // Create vector for right hand side. It is the product of an elementary matrix with the eigenvector.
+                RHS.setZero();
+                RHS(ii) = -vectormax(jj);
+                // Solve
+                SOL = LHS.lu().solve(RHS);
+                dvectormaxdCCe[0](ii,jj) = SOL(0); // II counts the Voigt components of CCe, index has the eigenvector components
+                dvectormaxdCCe[1](ii,jj) = SOL(1);
+                //dlamdamaxdCCe[II] = SOL(2);
+            }
+        }
+
+        for (int ii=0; ii<2; ii++){
+            for (int jj=0; jj<2; jj++) {
+                for (int kk=0; kk<2; kk++){
+                    for (int ll=0; ll<2; ll++) {
+                        for (int mm=0; mm<2; mm++) {
+                            dvectormaxdCC[mm](kk,ll) = dvectormaxdCCe[mm](ii,jj)*(FFginv(ii,jj)*FFginv(kk,ll));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Alternatively for the eigenvalue we can use the rule from Holzapfel
+        // But we still need dCCedCC for the chain rule
+        Matrix2d dlamdamaxdCCe = vectormax*vectormax.transpose();
+        Matrix2d dlamdamindCCe = vectormin*vectormin.transpose();
+
+        // Multiply by dCCdCCe to get dlamdadCC
+        Matrix2d dlamdamaxdCC; Matrix2d dlamdamindCC;
+        dlamdamaxdCC.setZero(); dlamdamindCC.setZero();
+        for (int ii=0; ii<2; ii++){
+            for (int jj=0; jj<2; jj++) {
+                for (int kk=0; kk<2; kk++){
+                    for (int ll=0; ll<2; ll++) {
+                        dlamdamaxdCC(kk,ll) = dlamdamaxdCCe(ii,jj)*(FFginv(ii,jj)*FFginv(kk,ll));
+                        dlamdamindCC(kk,ll) = dlamdamindCCe(ii,jj)*(FFginv(ii,jj)*FFginv(kk,ll));
+                    }
+                }
+            }
+        }
+
+        // Calculate derivative of lamdaE wrt CC. This will involve an elementary matrix.
+        Matrix2d dlamdaE_a_dCC; dlamdaE_a_dCC.setZero();
+        Matrix2d dlamdaE_s_dCC; dlamdaE_s_dCC.setZero();
+        // Matrix multiplication is associative, so d(a0*FFginv)*CC*(FFginv*a0)/dCC
+        // is the outer product of the two vectors we get from a0*FFginv
+        // and the symmetry makes the calculation easier
+        for (int ii=0; ii<2; ii++) {
+            for (int jj = 0; jj < 2; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    for (int ll = 0; ll < 2; ll++) {
+                        dlamdaE_a_dCC(jj,kk) = (a0(ii) * FFginv(ii,jj)) * (FFginv(kk,ll) * a0(ll));
+                        dlamdaE_s_dCC(jj,kk) = (s0(ii) * FFginv(ii,jj)) * (FFginv(kk,ll) * s0(ll));
+                    }
+                }
+            }
+        }
+        // Calculate derivative of He wrt to CC. If this is the same H, this is the same as in the main code.
+        Matrix2d dHedCC_explicit, dphifdotplusdCC; dHedCC_explicit.setZero(); dphifdotplusdCC.setZero();
+        phif_dot_plus = (p_phi + (p_phi_c*c)/(K_phi_c+c) + p_phi_theta*He)*(rho/(K_phi_rho+phif));
+        dHedCC_explicit = (-1./pow((1.+exp(-gamma_theta*(Je - vartheta_e))),2))*(exp(-gamma_theta*(Je - vartheta_e)))*(-gamma_theta)*(J*CCinv/(2*Jp));
+        dphifdotplusdCC = p_phi_theta*dHedCC_explicit*(rho/(K_phi_rho+phif));
+        //std::cout<<"RHO " << rho << " p_phi_theta " << p_phi_theta << " dHedCC_explicit " << dHedCC_explicit << " CCinv " << CCinv;
+
+        //----------//
+        // X
+        //----------//
+        // Explicit derivatives of the local variables with respect to CC (phi, a0, kappa, lamdap)
+        // Really, there are 8*9 = 72 components.
+        // Then, remember that CC is symmetric so we actually only need 8*6 = 48 unique values.
+        std::vector<Matrix2d> da0dCC(2,Matrix2d::Zero());
+        for (int ii=0; ii<2; ii++){
+            for (int jj=0; jj<2; jj++) {
+                for (int kk=0; kk<2; kk++){
+                    for (int ll=0; ll<2; ll++) {
+                        da0dCC[kk](ii,jj) += (2.*PIE/tau_omega)*((dphifdotplusdCC(ii,jj)*lamdamax*(Matrix2d::Identity()(kk,ll)-a0a0(kk,ll))*(vectormax(ll)))
+                                                                 + (phif_dot_plus*dlamdamaxdCC(ii,jj)*(Matrix2d::Identity()(kk,ll)-a0a0(kk,ll))*(vectormax(ll)))
+                                                                 + (phif_dot_plus*lamdamax*((Matrix2d::Identity()(kk,ll)-a0a0(kk,ll))*dvectormaxdCC[ll](ii,jj))));
+                    }
+                }
+            }
+        }
+
+
+        for (int II=0; II<3; II++){
+            int ii = voigt_table_I_i(II);
+            int jj = voigt_table_I_j(II);
+            // phif
+            dThetadCC(0+II) += local_dt*dphifdotplusdCC(ii,jj);
+            // a0x, a0y, a0z
+            dThetadCC(3+II) += local_dt*da0dCC[0](ii,jj);
+            dThetadCC(6+II) += local_dt*da0dCC[1](ii,jj);
+            // kappa
+            dThetadCC(9+II) += (local_dt/(tau_kappa))*((dphifdotplusdCC(ii,jj)*(pow(lamdamin/lamdamax,gamma_kappa)/2. - kappa))
+                                                        + ((phif_dot_plus/2.)*(pow(dlamdamindCC(ii,jj)/lamdamax,gamma_kappa) - pow(lamdamin*dlamdamaxdCC(ii,jj)/(lamdamax*lamdamax),gamma_kappa))));
+            // lamdaPa, lamdaPs, lamdaPn
+            dThetadCC(12+II) += (local_dt/tau_lamdaP_a)*((dphifdotplusdCC(ii,jj)*(lamdaE_a-1)) + (phif_dot_plus*(dlamdaE_a_dCC(ii,jj))));
+            dThetadCC(15+II) += (local_dt/tau_lamdaP_s)*((dphifdotplusdCC(ii,jj)*(lamdaE_s-1)) + (phif_dot_plus*(dlamdaE_s_dCC(ii,jj))));
+        }
+
+        //----------//
+        // RHO
+        //----------//
+
+        // Explicit derivatives of the local variables with respect to rho
+        // Assemble in one vector (phi, a0x, a0y, kappa, lamdap1, lamdap2)
+        double dphifdotplusdrho = ((p_phi + (p_phi_c*c)/(K_phi_c+c)+p_phi_theta*He)*(1/(K_phi_rho+phif)));
+        dThetadrho(0) += local_dt*(dphifdotplusdrho - (c*d_phi_rho_c)*phif);
+        dThetadrho(1) += local_dt*(((2.*PIE)/(tau_omega))*lamdamax*(Matrix2d::Identity()-a0a0)*(vectormax))(0)*dphifdotplusdrho;
+        dThetadrho(2) += local_dt*(((2.*PIE)/(tau_omega))*lamdamax*(Matrix2d::Identity()-a0a0)*(vectormax))(1)*dphifdotplusdrho;
+        dThetadrho(3) += local_dt*(1/tau_kappa)*( pow(lamdamin/lamdamax,gamma_kappa)/2. - kappa)*dphifdotplusdrho;
+        dThetadrho(4) += local_dt*((lamdaE_a-1)/tau_lamdaP_a)*dphifdotplusdrho;
+        dThetadrho(5) += local_dt*((lamdaE_s-1)/tau_lamdaP_s)*dphifdotplusdrho;
+
+        //----------//
+        // c
+        //----------//
+
+        // Explicit derivatives of the local variables with respect to c
+        // Assemble in one vector (phi, a0x, a0y, kappa, lamdap1, lamdap2)
+        //double dphifdotplusdc = ((p_phi_c*K_phi_c)/(pow(K_phi_c+c,2)))*(rho/(K_phi_rho+phif_0));
+        double dphifdotplusdc = (rho/(K_phi_rho+phif))*((p_phi_c)/(K_phi_c+c) - (p_phi_c*c)/((K_phi_c+c)*(K_phi_c+c)));
+        dThetadc(0) += local_dt*(dphifdotplusdc - (rho*d_phi_rho_c)*phif);
+        dThetadc(1) += local_dt*(((2.*PIE)/(tau_omega))*lamdamax*(Matrix2d::Identity()-a0a0)*(vectormax))(0)*dphifdotplusdc;
+        dThetadc(2) += local_dt*(((2.*PIE)/(tau_omega))*lamdamax*(Matrix2d::Identity()-a0a0)*(vectormax))(1)*dphifdotplusdc;
+        dThetadc(3) += local_dt*(1/tau_kappa)*( pow(lamdamin/lamdamax,gamma_kappa)/2. - kappa)*dphifdotplusdc;
+        dThetadc(4) += local_dt*((lamdaE_a-1)/tau_lamdaP_a)*dphifdotplusdc;
+        dThetadc(5) += local_dt*((lamdaE_s-1)/tau_lamdaP_s)*dphifdotplusdc;
+
+        //---------------------//
+        // COMPARE WITH NUMERICAL
+        //---------------------//
+        /*
+        // Calculate numerical derivatives
+        //std::cout << "Last iteration" << "\n";
+        double phif_dot_plus_num; double phif_dot_minus;
+        double kappa_dot_plus; double kappa_dot_minus;
+        Vector2d a0_dot_plus; Vector2d a0_dot_minus;
+        Vector2d lamdaP_dot_plus; Vector2d lamdaP_dot_minus;
+        epsilon = 1e-7;
+        double rho_plus = rho + epsilon;
+        double rho_minus = rho - epsilon;
+        double c_plus = c + epsilon;
+        double c_minus = c - epsilon;
+        Matrix2d CC_plus, CC_minus;
+
+        // Call update function with plus and minus to get numerical derivatives
+        evalForwardEulerUpdate(local_dt, local_parameters, c, rho_plus, FF, CC, phif, a0, s0, kappa, lamdaP, phif_dot_plus_num, a0_dot_plus, kappa_dot_plus, lamdaP_dot_plus);
+        evalForwardEulerUpdate(local_dt, local_parameters, c, rho_minus, FF, CC,phif, a0, s0, kappa, lamdaP, phif_dot_minus, a0_dot_minus, kappa_dot_minus, lamdaP_dot_minus);
+        dThetadrho_num(0) += local_dt*(1./(2.*epsilon))*(phif_dot_plus_num-phif_dot_minus);
+        dThetadrho_num(1) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(0)-a0_dot_minus(0));
+        dThetadrho_num(2) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(1)-a0_dot_minus(1));
+        dThetadrho_num(3) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(2)-a0_dot_minus(2));
+        dThetadrho_num(4) += local_dt*(1./(2.*epsilon))*(kappa_dot_plus-kappa_dot_minus);
+        dThetadrho_num(5) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(0)-lamdaP_dot_minus(0));
+        dThetadrho_num(6) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(1)-lamdaP_dot_minus(1));
+        dThetadrho_num(7) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(2)-lamdaP_dot_minus(2));
+
+        evalForwardEulerUpdate(local_dt, local_parameters, c_plus, rho, FF, CC, phif, a0, s0, kappa, lamdaP, phif_dot_plus_num, a0_dot_plus, kappa_dot_plus, lamdaP_dot_plus);
+        evalForwardEulerUpdate(local_dt, local_parameters, c_minus, rho, FF, CC, phif, a0, s0, kappa, lamdaP, phif_dot_minus, a0_dot_minus, kappa_dot_minus, lamdaP_dot_minus);
+        dThetadc_num(0) += local_dt*(1./(2.*epsilon))*(phif_dot_plus_num-phif_dot_minus);
+        dThetadc_num(1) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(0)-a0_dot_minus(0));
+        dThetadc_num(2) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(1)-a0_dot_minus(1));
+        dThetadc_num(3) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(2)-a0_dot_minus(2));
+        dThetadc_num(4) += local_dt*(1./(2.*epsilon))*(kappa_dot_plus-kappa_dot_minus);
+        dThetadc_num(5) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(0)-lamdaP_dot_minus(0));
+        dThetadc_num(6) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(1)-lamdaP_dot_minus(1));
+        dThetadc_num(7) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(2)-lamdaP_dot_minus(2));
+
+        for (int II=0; II<6; II++){
+            int ii = voigt_table_I(II);
+            int jj = voigt_table_J(II);
+
+            CC_plus = CC;
+            CC_minus = CC;
+            CC_plus(ii,jj) += epsilon;
+            CC_minus(ii,jj) -= epsilon;
+            evalForwardEulerUpdate(local_dt, local_parameters, c, rho, FF, CC_plus, phif, a0, s0, kappa, lamdaP, phif_dot_plus_num, a0_dot_plus, kappa_dot_plus, lamdaP_dot_plus);
+            evalForwardEulerUpdate(local_dt, local_parameters, c, rho, FF, CC_minus, phif, a0, s0, kappa, lamdaP, phif_dot_minus, a0_dot_minus, kappa_dot_minus, lamdaP_dot_minus);
+
+            // phif
+            dThetadCC_num(0+II) += local_dt*(1./(2.*epsilon))*(phif_dot_plus_num-phif_dot_minus);
+            // a0x, a0y, a0z
+            dThetadCC_num(6+II) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(0)-a0_dot_minus(0));
+            dThetadCC_num(12+II) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(1)-a0_dot_minus(1));
+            dThetadCC_num(18+II) += local_dt*(1./(2.*epsilon))*(a0_dot_plus(2)-a0_dot_minus(2));
+            // kappa
+            dThetadCC_num(24+II) += local_dt*(1./(2.*epsilon))*(kappa_dot_plus-kappa_dot_minus);
+            // lamdaPa, lamdaPs, lamdaPn
+            dThetadCC_num(30+II) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(0)-lamdaP_dot_minus(0));
+            dThetadCC_num(36+II) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(1)-lamdaP_dot_minus(1));
+            dThetadCC_num(42+II) += local_dt*(1./(2.*epsilon))*(lamdaP_dot_plus(2)-lamdaP_dot_minus(2));
+        }*/
+
+        //---------------------//
+        // UPDATE VARIABLES
+        //---------------------//
+        // Collagen density PHI
+        phif = phif + local_dt*(phif_dot);
+
+        // Principal direction A0
+        Vector2d a0_00 = a0;
+        a0 = a0 + local_dt*a0_dot;
+        // normalize a0
+        a0 = a0/sqrt(a0.dot(a0));
+        //std::cout << "\n a0_00: " << a0_00 << "\n a0: " << a0 << "\n";
+
+        // These should retain their normality, but we can renormalize
+        s0 = Rot90*a0;
+        s0 = s0/sqrt(s0.dot(s0));
+
+        // These should retain their orthogonality, but we could refacor with modified Gram-Schmidt if they become non-orthogonal
+//        n = size(V,1);
+//        k = size(V,2);
+//        U = zeros(n,k);
+//        U(:,1) = V(:,1)/sqrt(V(:,1)'*V(:,1));
+//        for i = 2:k
+//        U(:,i) = V(:,i);
+//        for j = 1:i-1
+//        U(:,i) = U(:,i) - ( U(:,j)'*U(:,i) )/( U(:,j)'*U(:,j) )*U(:,j);
+//        end
+//        U(:,i) = U(:,i)/sqrt(U(:,i)'*U(:,i));
+//        end
+
+        // Dispersion KAPPA
+        kappa = kappa + local_dt*(kappa_dot);
+
+        // Permanent deformation LAMDAP
+        lamdaP = lamdaP + local_dt*(lamdaP_dot);
+
+        //std::cout << "\nphif: " << phif << ", kappa: " << kappa << ", lamdaP:" << lamdaP(0) << "," << lamdaP(1) << "," << lamdaP(2)
+        //          << ",a0:" << a0(0) << "," << a0(1) << "," << a0(2) << ",s0:" << s0(0) << "," << s0(1) << "," << s0(2) << ",n0:" << n0(0) << "," << n0(1) << "," << n0(2) << "\n";
+    }
+    //myfile.close();
+
+
+
+    //std::cout<<"lamda1: "<<lamda2d(1)<<", lamda0: "<<lamda2d(0)<<", lamdaP:"<<lamdaP(0)<<","<<lamdaP(1)<<",a0:"<<a0(0)<<","<<a0(1)<<"Ce_aa: "<<Ce_aa<<","<<Ce_ss<<"\n";
+    //std::cout<<"\n CC \n"<<CCproj;
+    //std::cout << "\n" << dThetadCC_num << "\n";
+    //std::cout << "\n" << dThetadrho_num << "\n";
+    //std::cout << "\n" << dThetadc_num << "\n";
+}
+
+void evalForwardEulerUpdate(double local_dt, const std::vector<double> &local_parameters, double c,double rho,const Matrix2d &FF, const Matrix2d &CC,
+                            const double &phif, const Vector2d &a0, const double &kappa, const Vector2d &lamdaP,
+                            double &phif_dot, Vector2d &a0_dot, double &kappa_dot, Vector2d &lamdaP_dot)
+{
+    //---------------------------------//
+    // Parameters
+    //
+    // collagen fraction
+    double p_phi = local_parameters[0]; // production by fibroblasts, natural rate
+    double p_phi_c = local_parameters[1]; // production up-regulation, weighted by C and rho
+    double p_phi_theta = local_parameters[2]; //production regulated by stretch
+    double K_phi_c = local_parameters[3]; // saturation of C effect on deposition
+    double K_phi_rho = local_parameters[4]; // saturation of collagen fraction itself
+    double d_phi = local_parameters[5]; // rate of degradation
+    double d_phi_rho_c = local_parameters[6]; // rate of degradation
+    //
+    // fiber alignment
+    double tau_omega = local_parameters[7]; // time constant for angular reorientation
+    //
+    // dispersion parameter
+    double tau_kappa = local_parameters[8]; // time constant
+    double gamma_kappa = local_parameters[9]; // exponent of the principal stretch ratio
+    //
+    // permanent contracture/growth
+    double tau_lamdaP_a = local_parameters[10]; // time constant for direction a
+    double tau_lamdaP_s = local_parameters[11]; // time constant for direction s
+    //
+    double gamma_theta = local_parameters[12]; // exponent of the Heaviside function
+    double vartheta_e = local_parameters[13]; // mechanosensing response
+    //
+    // solution parameters
+    double tol_local = local_parameters[14]; // local tolerance
+    double max_local_iter = local_parameters[15]; // max local iter
+    //
+
+    double PIE = 3.14159;
+    Matrix2d Rot90;Rot90<<0.,-1.,1.,0.;
+
+    Vector2d s0 = Rot90*a0;
+    //std::cout<<"a0"<<"\n"<<a0<<"\n"<<"s0"<<"\n"<<s0<<"\n"<<"n0"<<"\n"<<n0<<'\n';
+    // fiber tensor in the reference
+    Matrix2d a0a0 = a0*a0.transpose();
+    Matrix2d s0s0 = s0*s0.transpose();
+    // recompute split
+    Matrix2d FFg = lamdaP(0)*(a0a0) + lamdaP(1)*(s0s0);
+    Matrix2d FFginv = (1./lamdaP(0))*(a0a0) + (1./lamdaP(1))*(s0s0);
+    //Matrix2d FFe = FF*FFginv;
+    // std::cout<<"recompute the split.\nFF\n"<<FF<<"\nFg\n"<<FFg<<"\nFFe\n"<<FFe<<"\n";
+    // elastic strain
+    Matrix2d CCe = FFginv*CC*FFginv;
+    Matrix2d CCeinv = CCe.inverse();
+    // Jacobian of the deformations
+    double Jp = lamdaP(0)*lamdaP(1)*1.;
+    double Je = sqrt(CCe.determinant());
+    double J = Je*Jp;
+
+    // Eigenvalues
+    // Use .compute() for the QR algorithm, .computeDirect() for an explicit trig
+    // QR may be more accurate, but explicit is faster
+    // Eigenvalues
+    SelfAdjointEigenSolver<Matrix2d> eigensolver;
+    eigensolver.compute(CCe);
+    Vector2d lamda = eigensolver.eigenvalues();
+    Matrix2d vectors = eigensolver.eigenvectors();
+    double lamdamax = lamda(2);
+    double lamdamed = lamda(1);
+    double lamdamin = lamda(0);
+    Vector2d vectormax = vectors.col(2);
+    Vector2d vectormed = vectors.col(1);
+    Vector2d vectormin = vectors.col(0);
+    if (a0.dot(vectormax) < 0) {
+        vectormax = -vectormax;
+    }
+
+    double He = 1./(1.+exp(-gamma_theta*(Je - vartheta_e)));
+    //if(He<0.002){He=0;}
+
+    //----------------//
+    // 2D FORWARD-EULER EQUATIONS
+    //----------------//
+    // Collagen density PHI
+    double phif_dot_plus = (p_phi + (p_phi_c*c)/(K_phi_c+c) + p_phi_theta*He)*(rho/(K_phi_rho+phif));
+    //std::cout<<"phidotplus: "<<phif_dot_plus<<"\n";
+    phif_dot = phif_dot_plus - (d_phi + c*rho*d_phi_rho_c)*phif;
+
+    // Principal direction A0
+    // Alternatively, see Menzel (NOTE THAT THE THIRD COMPONENT IS THE LARGEST ONE)
+    a0_dot = ((2.*PIE*phif_dot_plus)/(tau_omega))*lamdamax*(Matrix2d::Identity()-a0a0)*vectormax;
+
+    // Dispersion KAPPA
+    // kappa_dot = (phif_dot_plus/tau_kappa)*(pow(lamda(2)/lamda(1),gamma_kappa)/2. - kappa);
+    kappa_dot = (phif_dot_plus/tau_kappa)*(pow(lamdamed/lamdamax,gamma_kappa)/3. - kappa);
+
+    // elastic stretches of the directions a and s
+    double Ce_aa = a0.transpose()*CCe*a0;
+    double Ce_ss = s0.transpose()*CCe*s0;
+    double lamdaE_a = sqrt(Ce_aa);
+    double lamdaE_s = sqrt(Ce_ss);
+
+    // Permanent deformation LAMDAP
+    lamdaP_dot(0) = phif_dot_plus*(lamdaE_a-1)/tau_lamdaP_a;
+    lamdaP_dot(1) = phif_dot_plus*(lamdaE_s-1)/tau_lamdaP_s;
 }
 
 //--------------------------------------------------------//

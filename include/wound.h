@@ -62,6 +62,24 @@ VectorXd &dThetadCC, VectorXd &dThetadrho, VectorXd &dThetadC);
 
 
 //========================================================//
+// LOCAL PROBLEM: structural update
+//
+void localWoundProblemExplicit(
+        double dt, const std::vector<double> &local_parameters,
+        double C,double rho,const Matrix2d &FF,
+        const double &phif_0, const Vector2d &a0_0, const double &kappa_0, const Vector2d &lamdaP_0,
+        double &phif, Vector2d &a0, double &kappa, Vector2d &lamdaP,
+        VectorXd &dThetadCC, VectorXd &dThetadrho, VectorXd &dThetadC);
+
+void evalForwardEulerUpdate(double local_dt, const std::vector<double> &local_parameters, double c,double rho,const Matrix2d &FF, const Matrix2d &CC,
+                            const double &phif, const Vector2d &a0, const double &kappa, const Vector2d &lamdaP,
+                            double &phif_dot, Vector2d &a0_dot, double &kappa_dot, Vector2d &lamdaP_dot);
+//
+//========================================================//
+
+
+
+// ========================================================//
 // OUTPUT FUNCTION: eval FF at coordinates xi, eta
 //
 Matrix2d evalWoundFF(

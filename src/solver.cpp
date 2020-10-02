@@ -1100,6 +1100,7 @@ void writeParaview(tissue &myTissue, const char* filename, const char* filename2
 	for(int i=0;i<myTissue.LineQuadri.size();i++)
 	{
 		savefile<<elem_size;
+        savefile2<<elem_size;
 		if(elem_size==8){
             savefile<<" "<<myTissue.LineQuadri[i][0];
             savefile<<" "<<myTissue.LineQuadri[i][2];
@@ -1201,12 +1202,11 @@ void writeParaview(tissue &myTissue, const char* filename, const char* filename2
     savefile2<<"\n";
     savefile2<<"POINT_DATA "<<myTissue.n_node<<"\nSCALARS lamdaP_Jp float "<<4<<"\nLOOKUP_TABLE default\n";
 	for(int i=0;i<myTissue.n_node;i++){
-		savefile<<  myTissue.node_rho[i] <<" "<<myTissue.node_c[i]<<" "<<node_phi[i]<<" "<< node_kappa[i] <<"\n"; // myTissue.boundary_flag[i] node_lamdaP[i](0)*node_lamdaP[i](1)
+		savefile<<  myTissue.node_rho[i] <<" "<<myTissue.node_c[i]<<" "<<node_phi[i]<<" "<< node_kappa[i] <<"\n"; // myTissue.boundary_flag[i]
         savefile2<<  node_lamdaP[i](0)*node_lamdaP[i](1) << " " << node_lamdaP[i](0)<<" "<<node_lamdaP[i](1)<<" 0\n";
     }
-    savefile<<"\n";
 	// write out the fiber direction
-	savefile<<"VECTORS a0 float\n";
+	savefile<<"\nVECTORS a0 float\n";
     savefile2<<"\nVECTORS lamdaE float\n";
 	for(int i=0;i<myTissue.n_node;i++){
 		savefile<<node_a0[i](0)<<" "<<node_a0[i](1)<<" 0\n";

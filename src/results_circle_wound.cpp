@@ -67,13 +67,13 @@ int main(int argc, char *argv[])
         double p_rho_theta = p_rho/2; // enhanced production by theta
         double K_rho_c= c_max/10.; // saturation of cell proliferation by chemical, this one is definitely not crucial, just has to be small enough <cmax
         double K_rho_rho = 10000; // saturation of cell by cell, from steady state
-        double d_rho = p_rho*(1-rho_phys/K_rho_rho); // decay of cells, 20 percent of cells die per day
-        double vartheta_e = -2.0; // physiological state of area stretch
-        double gamma_theta = 5.; // sensitivity of heviside function
+        double d_rho = p_rho*(1-rho_phys/K_rho_rho); // decay of cells, keeps equilibrium
+        double vartheta_e = 2.0; // physiological state of area stretch
+        double gamma_theta = 5.0; // sensitivity of heviside function
         double p_c_rho = 90.0e-16/rho_phys;// production of c by cells in g/cells/h
         double p_c_thetaE = 300.0e-16/rho_phys; // coupling of elastic and chemical, three fold
         double K_c_c = 1.;// saturation of chem by chem, from steady state
-        double d_c = 0.01/10; // 0.01 decay of chemical in 1/hours
+        double d_c = 0.01; // 0.01 decay of chemical in 1/hours
         //---------------------------------//
         std::vector<double> global_parameters = {k0,kf,k2,t_rho,t_rho_c,K_t,K_t_c,D_rhorho,D_rhoc,D_cc,p_rho,p_rho_c,p_rho_theta,K_rho_c,K_rho_rho,d_rho,vartheta_e,gamma_theta,p_c_rho,p_c_thetaE,K_c_c,d_c};
 
@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
         double p_phi_theta = p_phi; // mechanosensing upregulation. no need to normalize by Hmax since Hmax = 1
         double K_phi_c = 0.0001; // saturation of C effect on deposition. RANDOM?
         double d_phi = 0.000970; // rate of degradation, in the order of the wound process, 100 percent in one year for wound, means 0.000116 effective per hour means degradation = 0.002 - 0.000116
-        double d_phi_rho_c = 0.5*0.000970/rho_phys/c_max; // 0.000194; // degradation coupled to chemical and cell density to maintain phi equilibrium
-        double K_phi_rho = rho_phys*p_phi/d_phi -1; // saturation of collagen fraction itself, from steady state
+        double d_phi_rho_c = 0.5*d_phi/rho_phys/c_max; // 0.000194; // degradation coupled to chemical and cell density to maintain phi equilibrium
+        double K_phi_rho = rho_phys*p_phi/d_phi - 1; // saturation of collagen fraction itself, from steady state
         //
         //
         // fiber alignment
@@ -98,12 +98,12 @@ int main(int argc, char *argv[])
         double gamma_kappa = 5.; // exponent of the principal stretch ratio
         //
         // permanent contracture/growth
-        double tau_lamdaP_a = 0.05/(K_phi_rho+1); // time constant for direction a, on the order of a year
-        double tau_lamdaP_s = 0.05/(K_phi_rho+1); // time constant for direction s, on the order of a year
+        double tau_lamdaP_a = 0.01/(K_phi_rho+1); // time constant for direction a, on the order of a year
+        double tau_lamdaP_s = 0.01/(K_phi_rho+1); // time constant for direction s, on the order of a year
         //
         // solution parameters
         double tol_local = 1e-5; // local tolerance
-        double max_local_iter = 35; // max local iter
+        double max_local_iter = 100; // max local iter (implicit) or time step ratio (explicit)
         //
         std::vector<double> local_parameters = {p_phi,p_phi_c,p_phi_theta,K_phi_c,K_phi_rho,d_phi,d_phi_rho_c,tau_omega,tau_kappa,gamma_kappa,tau_lamdaP_a,tau_lamdaP_s,gamma_theta,vartheta_e,tol_local,max_local_iter};
         //
@@ -115,8 +115,8 @@ int main(int argc, char *argv[])
         // values for the wound
         double rho_wound = 0; // [cells/mm^3]
         double c_wound = 1.0e-4;
-        double phif0_wound= 0.2;
-        double kappa0_wound = 0.4;
+        double phif0_wound= 0.1;
+        double kappa0_wound = 0.5;
         double a0x = frand(0,1.);
         double a0y = sqrt(1-a0x*a0x);
         Vector2d a0_wound;a0_wound<<a0x,a0y;
@@ -187,8 +187,8 @@ int main(int argc, char *argv[])
         double tol_boundary = 0.1;
         double x_center = 0.0;
         double y_center = 0.0;
-        double x_axis = 15;
-        double y_axis = 15;
+        double x_axis = 7.5;
+        double y_axis = 7.5;
         double alpha_ellipse = 0.;
 
         //std::vector<double> ellipse = {x_center, y_center, x_axis, y_axis, alpha_ellipse};
@@ -346,7 +346,8 @@ int main(int argc, char *argv[])
 
 
         std::stringstream ss;
-        std::string filename = "paraview_ouput"+ss.str()+"_";
+        ss << sample;
+        std::string filename = "sample_" + ss.str() + "_paraview_ouput_";
 
 
         //----------------------------------------------------------//
