@@ -20,7 +20,7 @@ endif()
 set (Boost_USE_STATIC_LIBS OFF) # enable dynamic linking
 set (Boost_USE_MULTITHREAD ON)  # enable multithreading
 
-#[[find_package(OpenMP)
+find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -35,7 +35,7 @@ endif()
 find_package(LAPACK)
 IF (LAPACK_FOUND)
     include_directories(${LAPACK_INCLUDE_DIR})
-endif()]]
+endif()
 
 
 add_executable(woundcpp2D
@@ -47,4 +47,4 @@ add_executable(woundcpp2D
         src/solver.cpp
         src/wound.cpp)
 
-target_link_libraries (woundcpp2D ${Boost_LIBRARIES}) #  ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} OpenMP::OpenMP_CXX
+target_link_libraries (woundcpp2D ${Boost_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} OpenMP::OpenMP_CXX) #
