@@ -394,7 +394,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		double Psif1 = 2*k2*kappa*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 		double Psif4 = 2*k2*(1-2*kappa)*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 		//Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
-        Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
+        Matrix2d SSe_pas = k0*Identity + (Psif1*Identity + Psif4*a0a0);
 		// pull back to the reference
 		Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 		// magnitude from systems bio
@@ -406,7 +406,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		Matrix2d SS_pres = pressure*thetaP*CCinv;
 		//std::cout<<"stresses.\nSSpas\n"<<SS_pas<<"\nSS_act\n"<<SS_act<<"\nSS_pres"<<SS_pres<<"\n";
 		//Matrix2d SS = SS_pas + SS_pres + SS_act;
-        Matrix2d SS = (SS_pas) + SS_pres + SS_act; //phif*
+        Matrix2d SS = phif*(SS_pas) + SS_pres + SS_act;
         ip_stress[ip] = SS;
 		Vector3d SS_voigt = Vector3d(SS(0,0),SS(1,1),SS(0,1));
 		// Flux and Source terms for the rho and the C
@@ -567,7 +567,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 										//						phif*(Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
 										//					  +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
 
-                                        dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += phif*theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
+                                        dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
                                                 (Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
                                                       +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
 									}
@@ -616,7 +616,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 				
 				// TOTAL. now include the structural parameters
 				//DDtot(II,JJ) = DDpres(II,JJ)+DDpas(II,JJ)+DDact(II,JJ)+DDstruct(II,JJ);
-                DDtot(II,JJ) = DDpres(II,JJ)+ (DDpas(II,JJ)) + DDact(II,JJ) + DDstruct(II,JJ); // phif*
+                DDtot(II,JJ) = DDpres(II,JJ)+ phif*(DDpas(II,JJ)) + DDact(II,JJ) + DDstruct(II,JJ);
 				
 				//--------------------------------------------------//		
 				// CHECKING
@@ -910,7 +910,7 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	double Psif1 = 2*k2*kappa*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 	double Psif4 = 2*k2*(1-2*kappa)*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 	//Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
-    Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
+    Matrix2d SSe_pas = k0*Identity + (Psif1*Identity + Psif4*a0a0);
 	// pull back to the reference
 	Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 	// magnitude from systems bio
@@ -921,7 +921,7 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	double pressure = -k0*lamda_N*lamda_N;
 	Matrix2d SS_pres = pressure*thetaP*CCinv;
 	//SS = SS_pas + SS_act + SS_pres;
-    SS = (SS_pas) + SS_pres + SS_act; //phif*
+    SS = phif*(SS_pas) + SS_pres + SS_act;
 	// Flux and Source terms for the rho and the C
 	//Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
 	Q_c = -D_cc*CCinv*Grad_c;

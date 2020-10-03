@@ -57,12 +57,12 @@ int main(int argc, char *argv[])
         double k2 = 0.048; // nonlinear exponential coefficient, non-dimensional
         double t_rho = 0.0045/rho_phys; // 0.0045 force of fibroblasts in MPa, this is per cell. so, in an average sense this is the production by the natural density
         double t_rho_c = (0.045)/rho_phys; // 0.045 force of myofibroblasts enhanced by chemical, I'm assuming normalized chemical, otherwise I'd have to add a normalizing constant
-        double K_t = 0.4; // Saturation of mechanical force by collagen
+        double K_t = 0.3; // Saturation of mechanical force by collagen
         double K_t_c = c_max/10.; // saturation of chemical on force. this can be calculated from steady state
         double D_rhorho = 0.0833; // diffusion of cells in [mm^2/hour], not normalized
         double D_rhoc = -1.66e-12/c_max/c_max; // diffusion of chemotactic gradient, an order of magnitude greater than random walk [mm^2/hour], not normalized
         double D_cc = 0.01208; // 0.15 diffusion of chemical TGF, not normalized.
-        double p_rho = 0.034; // in 1/hour production of fibroblasts naturally, proliferation rate, not normalized, based on data of doubling rate from commercial use
+        double p_rho = 0.034/2; // in 1/hour production of fibroblasts naturally, proliferation rate, not normalized, based on data of doubling rate from commercial use
         double p_rho_c = p_rho/2; // production enhanced by the chem, if the chemical is normalized, then suggest two fold,
         double p_rho_theta = p_rho/2; // enhanced production by theta
         double K_rho_c= c_max/10.; // saturation of cell proliferation by chemical, this one is definitely not crucial, just has to be small enough <cmax
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         // values for the wound
         double rho_wound = 0; // [cells/mm^3]
         double c_wound = 1.0e-4;
-        double phif0_wound= 0.1;
+        double phif0_wound= 0.01;
         double kappa0_wound = 0.5;
         double a0x = frand(0,1.);
         double a0y = sqrt(1-a0x*a0x);
