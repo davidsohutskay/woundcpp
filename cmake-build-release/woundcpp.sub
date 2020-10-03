@@ -9,4 +9,4 @@
 # Change to the directory
 
 export OMP_NUM_THREADS=24
-./woundcpp3D
+./woundcpp2D

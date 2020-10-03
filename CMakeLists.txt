@@ -8,8 +8,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include_directories(include)
 include_directories(meshing)
 include_directories(src)
-include_directories(../eigen)
-include_directories(../boost_1_71_0)
+include_directories(../../eigen)
+include_directories(../../boost_1_71_0)
 
 set(BOOST_ROOT "../boost_1_71_0")
 

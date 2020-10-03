@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         double D_rhorho = 0.0833; // diffusion of cells in [mm^2/hour], not normalized
         double D_rhoc = -1.66e-12/c_max/c_max; // diffusion of chemotactic gradient, an order of magnitude greater than random walk [mm^2/hour], not normalized
         double D_cc = 0.01208; // 0.15 diffusion of chemical TGF, not normalized.
-        double p_rho = 0.034/2; // in 1/hour production of fibroblasts naturally, proliferation rate, not normalized, based on data of doubling rate from commercial use
+        double p_rho = 0.034; // in 1/hour production of fibroblasts naturally, proliferation rate, not normalized, based on data of doubling rate from commercial use
         double p_rho_c = p_rho/2; // production enhanced by the chem, if the chemical is normalized, then suggest two fold,
         double p_rho_theta = p_rho/2; // enhanced production by theta
         double K_rho_c= c_max/10.; // saturation of cell proliferation by chemical, this one is definitely not crucial, just has to be small enough <cmax
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         //
         // solution parameters
         double tol_local = 1e-5; // local tolerance
-        double max_local_iter = 100; // max local iter (implicit) or time step ratio (explicit)
+        double max_local_iter = 35; // max local iter (implicit) or time step ratio (explicit)
         //
         std::vector<double> local_parameters = {p_phi,p_phi_c,p_phi_theta,K_phi_c,K_phi_rho,d_phi,d_phi_rho_c,tau_omega,tau_kappa,gamma_kappa,tau_lamdaP_a,tau_lamdaP_s,gamma_theta,vartheta_e,tol_local,max_local_iter};
         //

@@ -252,13 +252,13 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		//---------------------------------//
 		// LOCAL NEWTON: structural problem
 		//
-        VectorXd dThetadCC(18);dThetadCC.setZero();
-		//VectorXd dThetadCC(24);dThetadCC.setZero();
+        //VectorXd dThetadCC(18);dThetadCC.setZero();
+		VectorXd dThetadCC(24);dThetadCC.setZero();
 		VectorXd dThetadrho(6);dThetadrho.setZero();
 		VectorXd dThetadc(6);dThetadc.setZero();
 		//std::cout<<"Local variables before update:\nphif0 = "<<ip_phif_0[ip]<<"\nkappa_0 = "<<ip_kappa_0[ip]<<"\na0_0 = ["<<ip_a0_0[ip](0)<<","<<ip_a0_0[ip](1)<<"]\nlamdaP_0 = ["<<ip_lamdaP_0[ip](0)<<","<<ip_lamdaP_0[ip](1)<<"]\n";
-		//localWoundProblem(dt,local_parameters,c,rho,CC,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
-        localWoundProblemExplicit(dt,local_parameters,c,rho,FF,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
+		localWoundProblem(dt,local_parameters,c,rho,CC,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
+        //localWoundProblemExplicit(dt,local_parameters,c,rho,FF,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
 		//
 		// rename variables to make it easier to track
 		double phif_0 = ip_phif_0[ip];
@@ -288,48 +288,48 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
         Matrix2d dlamdaP_adCC; dlamdaP_adCC.setZero();
         Matrix2d dlamdaP_sdCC; dlamdaP_sdCC.setZero();
 		// remember dThetatCC: 4 phi, 4 a0x, 4 a0y, 4 kappa, 4 lamdaPa, 4 lamdaPs
-//		dphifdCC(0,0) = dThetadCC(0);
-//		dphifdCC(0,1) = dThetadCC(1);
-//		dphifdCC(1,0) = dThetadCC(2);
-//		dphifdCC(1,1) = dThetadCC(3);
-//		da0xdCC(0,0) = dThetadCC(4);
-//		da0xdCC(0,1) = dThetadCC(5);
-//		da0xdCC(1,0) = dThetadCC(6);
-//		da0xdCC(1,1) = dThetadCC(7);
-//		da0ydCC(0,0) = dThetadCC(8);
-//		da0ydCC(0,1) = dThetadCC(9);
-//		da0ydCC(1,0) = dThetadCC(10);
-//		da0ydCC(1,1) = dThetadCC(11);
-//		dkappadCC(0,0) = dThetadCC(12);
-//		dkappadCC(0,1) = dThetadCC(13);
-//		dkappadCC(1,0) = dThetadCC(14);
-//		dkappadCC(1,1) = dThetadCC(15);
-//        dlamdaP_adCC(0,0) = dThetadCC(16);
-//        dlamdaP_adCC(0,1) = dThetadCC(17);
-//        dlamdaP_adCC(1,0) = dThetadCC(18);
-//        dlamdaP_adCC(1,1) = dThetadCC(19);
-//        dlamdaP_sdCC(0,0) = dThetadCC(20);
-//        dlamdaP_sdCC(0,1) = dThetadCC(21);
-//        dlamdaP_sdCC(1,0) = dThetadCC(22);
-//        dlamdaP_sdCC(1,1) = dThetadCC(23);
-        for (int II=0; II<3; II++){
-            int ii = voigt_table_I_i(II);
-            int jj = voigt_table_I_j(II);
-            dphifdCC(ii,jj) = dThetadCC(0+II);
-            da0xdCC(ii,jj) = dThetadCC(3+II);
-            da0ydCC(ii,jj) = dThetadCC(6+II);
-            dkappadCC(ii,jj) = dThetadCC(9+II);
-            dlamdaP_adCC(ii,jj) = dThetadCC(12+II);
-            dlamdaP_sdCC(ii,jj) = dThetadCC(15+II);
-            if(ii!=jj){
-                dphifdCC(jj,ii) = dThetadCC(0+II);
-                da0xdCC(jj,ii) = dThetadCC(3+II);
-                da0ydCC(jj,ii) = dThetadCC(6+II);
-                dkappadCC(jj,ii) = dThetadCC(9+II);
-                dlamdaP_adCC(jj,ii) = dThetadCC(12+II);
-                dlamdaP_sdCC(jj,ii) = dThetadCC(15+II);
-            }
-        }
+		dphifdCC(0,0) = dThetadCC(0);
+		dphifdCC(0,1) = dThetadCC(1);
+		dphifdCC(1,0) = dThetadCC(2);
+		dphifdCC(1,1) = dThetadCC(3);
+		da0xdCC(0,0) = dThetadCC(4);
+		da0xdCC(0,1) = dThetadCC(5);
+		da0xdCC(1,0) = dThetadCC(6);
+		da0xdCC(1,1) = dThetadCC(7);
+		da0ydCC(0,0) = dThetadCC(8);
+		da0ydCC(0,1) = dThetadCC(9);
+		da0ydCC(1,0) = dThetadCC(10);
+		da0ydCC(1,1) = dThetadCC(11);
+		dkappadCC(0,0) = dThetadCC(12);
+		dkappadCC(0,1) = dThetadCC(13);
+		dkappadCC(1,0) = dThetadCC(14);
+		dkappadCC(1,1) = dThetadCC(15);
+        dlamdaP_adCC(0,0) = dThetadCC(16);
+        dlamdaP_adCC(0,1) = dThetadCC(17);
+        dlamdaP_adCC(1,0) = dThetadCC(18);
+        dlamdaP_adCC(1,1) = dThetadCC(19);
+        dlamdaP_sdCC(0,0) = dThetadCC(20);
+        dlamdaP_sdCC(0,1) = dThetadCC(21);
+        dlamdaP_sdCC(1,0) = dThetadCC(22);
+        dlamdaP_sdCC(1,1) = dThetadCC(23);
+//        for (int II=0; II<3; II++){
+//            int ii = voigt_table_I_i(II);
+//            int jj = voigt_table_I_j(II);
+//            dphifdCC(ii,jj) = dThetadCC(0+II);
+//            da0xdCC(ii,jj) = dThetadCC(3+II);
+//            da0ydCC(ii,jj) = dThetadCC(6+II);
+//            dkappadCC(ii,jj) = dThetadCC(9+II);
+//            dlamdaP_adCC(ii,jj) = dThetadCC(12+II);
+//            dlamdaP_sdCC(ii,jj) = dThetadCC(15+II);
+//            if(ii!=jj){
+//                dphifdCC(jj,ii) = dThetadCC(0+II);
+//                da0xdCC(jj,ii) = dThetadCC(3+II);
+//                da0ydCC(jj,ii) = dThetadCC(6+II);
+//                dkappadCC(jj,ii) = dThetadCC(9+II);
+//                dlamdaP_adCC(jj,ii) = dThetadCC(12+II);
+//                dlamdaP_sdCC(jj,ii) = dThetadCC(15+II);
+//            }
+//        }
 		// unpack the derivatives wrt rho
 		double dphifdrho = dThetadrho(0);
 		double da0xdrho  = dThetadrho(1);
@@ -394,7 +394,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		double Psif1 = 2*k2*kappa*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 		double Psif4 = 2*k2*(1-2*kappa)*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 		//Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
-        Matrix2d SSe_pas = k0*Identity + (Psif1*Identity + Psif4*a0a0);
+        Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
 		// pull back to the reference
 		Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 		// magnitude from systems bio
@@ -406,7 +406,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		Matrix2d SS_pres = pressure*thetaP*CCinv;
 		//std::cout<<"stresses.\nSSpas\n"<<SS_pas<<"\nSS_act\n"<<SS_act<<"\nSS_pres"<<SS_pres<<"\n";
 		//Matrix2d SS = SS_pas + SS_pres + SS_act;
-        Matrix2d SS = phif*(SS_pas + SS_pres) + SS_act;
+        Matrix2d SS = (SS_pas) + SS_pres + SS_act; //phif*
         ip_stress[ip] = SS;
 		Vector3d SS_voigt = Vector3d(SS(0,0),SS(1,1),SS(0,1));
 		// Flux and Source terms for the rho and the C
@@ -567,7 +567,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 										//						phif*(Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
 										//					  +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
 
-                                        dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
+                                        dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += phif*theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
                                                 (Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
                                                       +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
 									}
@@ -616,7 +616,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 				
 				// TOTAL. now include the structural parameters
 				//DDtot(II,JJ) = DDpres(II,JJ)+DDpas(II,JJ)+DDact(II,JJ)+DDstruct(II,JJ);
-                DDtot(II,JJ) = phif*(DDpres(II,JJ)+DDpas(II,JJ))+DDact(II,JJ)+DDstruct(II,JJ);
+                DDtot(II,JJ) = DDpres(II,JJ)+ (DDpas(II,JJ)) + DDact(II,JJ) + DDstruct(II,JJ); // phif*
 				
 				//--------------------------------------------------//		
 				// CHECKING
@@ -910,7 +910,7 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	double Psif1 = 2*k2*kappa*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 	double Psif4 = 2*k2*(1-2*kappa)*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 	//Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
-    Matrix2d SSe_pas = k0*Identity + (Psif1*Identity + Psif4*a0a0);
+    Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
 	// pull back to the reference
 	Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 	// magnitude from systems bio
@@ -921,7 +921,7 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	double pressure = -k0*lamda_N*lamda_N;
 	Matrix2d SS_pres = pressure*thetaP*CCinv;
 	//SS = SS_pas + SS_act + SS_pres;
-    SS = phif*(SS_pas + SS_pres) + SS_act;
+    SS = (SS_pas) + SS_pres + SS_act; //phif*
 	// Flux and Source terms for the rho and the C
 	//Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
 	Q_c = -D_cc*CCinv*Grad_c;
