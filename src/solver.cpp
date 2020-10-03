@@ -428,6 +428,10 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 			// Compute the numerical factorization 
 			//solver2.factorize(KK2); 
 			solver2.compute(KK2);
+            if(solver2.info()!=Eigen::Success) {
+                std::cout << "Factorization failed" << "\n";
+                goto solver_failed;
+            }
 			//Use the factors to solve the linear system 
 			SOL = solver2.solve(-1.*RR); 
 			
@@ -526,6 +530,8 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 
 	}
 	// FINISH TIME LOOP
+    solver_failed:
+    std::cout << "\nSolver failed, moving to next sample.\n";
 }
 
 
