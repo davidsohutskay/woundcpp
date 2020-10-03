@@ -411,9 +411,9 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		Vector3d SS_voigt = Vector3d(SS(0,0),SS(1,1),SS(0,1));
 		// Flux and Source terms for the rho and the C
 		//Vector2d Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
-		Vector2d Q_c = -D_cc*CCinv*Grad_c;
+		//Vector2d Q_c = -D_cc*CCinv*Grad_c;
         Vector2d Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
-        //Vector2d Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
+        Vector2d Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
 		// mechanosensing 
 		double He = 1./(1.+exp(-gamma_theta*(thetaE - vartheta_e)));
 		double S_rho = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho)*rho - d_rho*rho;
@@ -726,10 +726,10 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
                         dQ_rhodCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0(ii,jj)*Grad_rho(jj)
                                                                   - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0(ii,jj)*Grad_c(jj))*dtrAdCC(kk,ll) / (trA*trA);
 
-//                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_cc-phif*(D_cc-D_cc/10))*A0(ii,jj)*Grad_c(jj))
-//                                                          *dtrAdCC(kk,ll)/(trA*trA);
+                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_cc-phif*(D_cc-D_cc/10))*A0(ii,jj)*Grad_c(jj))
+                                                          *dtrAdCC(kk,ll)/(trA*trA);
 
-                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-0.5)*D_cc*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_c(jj);
+                        //dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-0.5)*D_cc*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_c(jj);
                     }
                 }
             }
@@ -761,8 +761,8 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
         Matrix2d linQ_rhodGradrho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0/trA;
         Vector2d linQ_rhodrho = -3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*A0*Grad_c/trA;
         Matrix2d linQ_rhodGradc = -3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0/trA;
-        //Matrix2d linQ_cdGradc = -3*(D_cc-phif*(D_cc-D_cc/10))*A0/trA;
-        Matrix2d linQ_cdGradc = -D_cc*CCinv;
+        Matrix2d linQ_cdGradc = -3*(D_cc-phif*(D_cc-D_cc/10))*A0/trA;
+        //Matrix2d linQ_cdGradc = -D_cc*CCinv;
 		//
 		// explicit derivatives of source terms
 		double dS_rhodrho_explicit = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho) - d_rho + rho*(p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(-1./K_rho_rho);
@@ -926,7 +926,7 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	//Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
 	Q_c = -D_cc*CCinv*Grad_c;
     Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
-    //Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
+    Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
 	double He = 1./(1.+exp(-gamma_theta*(thetaE - vartheta_e)));
 	S_rho = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho)*rho - d_rho*rho;
 	S_c = (p_c_rho*c+ p_c_thetaE*He)*(rho/(K_c_c+c)) - d_c*c;
