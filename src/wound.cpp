@@ -394,7 +394,7 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		double Psif1 = 2*k2*kappa*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 		double Psif4 = 2*k2*(1-2*kappa)*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 		//Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
-        Matrix2d SSe_pas = k0*Identity + (Psif1*Identity + Psif4*a0a0);
+        Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
 		// pull back to the reference
 		Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 		// magnitude from systems bio
@@ -406,14 +406,14 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		Matrix2d SS_pres = pressure*thetaP*CCinv;
 		//std::cout<<"stresses.\nSSpas\n"<<SS_pas<<"\nSS_act\n"<<SS_act<<"\nSS_pres"<<SS_pres<<"\n";
 		//Matrix2d SS = SS_pas + SS_pres + SS_act;
-        Matrix2d SS = phif*(SS_pas) + SS_pres + SS_act;
+        Matrix2d SS = SS_pas + SS_pres + SS_act;
         ip_stress[ip] = SS;
 		Vector3d SS_voigt = Vector3d(SS(0,0),SS(1,1),SS(0,1));
 		// Flux and Source terms for the rho and the C
-		//Vector2d Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
-		//Vector2d Q_c = -D_cc*CCinv*Grad_c;
-        Vector2d Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
-        Vector2d Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
+		Vector2d Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
+		Vector2d Q_c = -D_cc*CCinv*Grad_c;
+        //Vector2d Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
+        //Vector2d Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
 		// mechanosensing 
 		double He = 1./(1.+exp(-gamma_theta*(thetaE - vartheta_e)));
 		double S_rho = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho)*rho - d_rho*rho;
@@ -563,13 +563,13 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 							for(rr=0;rr<2;rr++){
 								for(ss=0;ss<2;ss++){
 									for(tt=0;tt<2;tt++){
-										//dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
-										//						phif*(Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
-										//					  +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
+										dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
+																phif*(Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
+															  +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
 
-                                        dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
-                                                (Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
-                                                      +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
+//                                        dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll] += theta*theta/2.*FFginv(ii,pp)*(FFginv(ss,kk)*FFginv(ll,tt)+FFginv(ss,ll)*FFginv(kk,tt))*FFginv(rr,jj)*(
+//                                                (Psif11*Identity(pp,rr)*Identity(ss,tt) + Psif14*Identity(pp,rr)*a0a0(ss,tt)
+//                                                      +Psif41*a0a0(pp,rr)*Identity(ss,tt) + Psif44*a0a0(pp,rr)*a0a0(ss,tt)));
 									}
 								}
 							}
@@ -615,8 +615,8 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 								+dSSdkappa(ii,jj)*dkappadCC(kk,ll)+dSSdlamdaPa(ii,jj)*dlamdaP_adCC(kk,ll)+dSSdlamdaPs(ii,jj)*dlamdaP_sdCC(kk,ll);
 				
 				// TOTAL. now include the structural parameters
-				//DDtot(II,JJ) = DDpres(II,JJ)+DDpas(II,JJ)+DDact(II,JJ)+DDstruct(II,JJ);
-                DDtot(II,JJ) = DDpres(II,JJ)+ phif*(DDpas(II,JJ)) + DDact(II,JJ) + DDstruct(II,JJ);
+				DDtot(II,JJ) = DDpres(II,JJ)+DDpas(II,JJ)+DDact(II,JJ)+DDstruct(II,JJ);
+                //DDtot(II,JJ) = DDpres(II,JJ)+ phif*(DDpas(II,JJ)) + DDact(II,JJ) + DDstruct(II,JJ);
 				
 				//--------------------------------------------------//		
 				// CHECKING
@@ -723,13 +723,16 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
                 for(int kk=0;kk<2;kk++) {
                     for(int ll=0;ll<2;ll++) {
                         // These are third order tensors, but there are two contractions from matrix multiplication
-                        dQ_rhodCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0(ii,jj)*Grad_rho(jj)
-                                                                  - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0(ii,jj)*Grad_c(jj))*dtrAdCC(kk,ll) / (trA*trA);
+//                        dQ_rhodCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0(ii,jj)*Grad_rho(jj)
+//                                                                  - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0(ii,jj)*Grad_c(jj))*dtrAdCC(kk,ll) / (trA*trA);
+//
+//                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_cc-phif*(D_cc-D_cc/10))*A0(ii,jj)*Grad_c(jj))
+//                                                          *dtrAdCC(kk,ll)/(trA*trA);
 
-                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-3*(D_cc-phif*(D_cc-D_cc/10))*A0(ii,jj)*Grad_c(jj))
-                                                          *dtrAdCC(kk,ll)/(trA*trA);
+                        dQ_rhodCC_explicit[ii*4+kk*2+ll] += -1.0*(-0.5)*D_rhorho*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_rho(jj)
+                                                            -1.0*(-0.5)*D_cc*rho*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_c(jj);
 
-                        //dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-0.5)*D_cc*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_c(jj);
+                        dQ_cdCC_explicit[ii*4+kk*2+ll] += -1.0*(-0.5)*D_cc*(CCinv(ii,kk)*CCinv(jj,ll)+CCinv(jj,kk)*CCinv(ii,ll))*Grad_c(jj);
                     }
                 }
             }
@@ -758,11 +761,14 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
         }
         //std::cout<<"\ndQ_rhodCC_voigt\n"<<dQ_rhodCC_voigt<<"\ndQ_cdCC_voigt\n"<<dQ_cdCC_voigt<<"\n";
 		// explicit linearizations. In this case no dependence on structural parameters.
-        Matrix2d linQ_rhodGradrho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0/trA;
-        Vector2d linQ_rhodrho = -3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*A0*Grad_c/trA;
-        Matrix2d linQ_rhodGradc = -3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0/trA;
-        Matrix2d linQ_cdGradc = -3*(D_cc-phif*(D_cc-D_cc/10))*A0/trA;
-        //Matrix2d linQ_cdGradc = -D_cc*CCinv;
+        //Matrix2d linQ_rhodGradrho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0/trA;
+        //Vector2d linQ_rhodrho = -3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*A0*Grad_c/trA;
+        //Matrix2d linQ_rhodGradc = -3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0/trA;
+        //Matrix2d linQ_cdGradc = -3*(D_cc-phif*(D_cc-D_cc/10))*A0/trA;
+        Matrix2d linQ_rhodGradrho = -D_rhorho*CCinv;
+        Vector2d linQ_rhodrho = -D_rhoc*CCinv*Grad_c;
+        Matrix2d linQ_rhodGradc = -D_rhoc*rho*CCinv;
+        Matrix2d linQ_cdGradc = -D_cc*CCinv;
 		//
 		// explicit derivatives of source terms
 		double dS_rhodrho_explicit = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho) - d_rho + rho*(p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(-1./K_rho_rho);
@@ -910,7 +916,7 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	double Psif1 = 2*k2*kappa*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 	double Psif4 = 2*k2*(1-2*kappa)*(kappa*I1e + (1-2*kappa)*I4e -1)*Psif;
 	//Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
-    Matrix2d SSe_pas = k0*Identity + (Psif1*Identity + Psif4*a0a0);
+    Matrix2d SSe_pas = k0*Identity + phif*(Psif1*Identity + Psif4*a0a0);
 	// pull back to the reference
 	Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 	// magnitude from systems bio
@@ -921,12 +927,12 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	double pressure = -k0*lamda_N*lamda_N;
 	Matrix2d SS_pres = pressure*thetaP*CCinv;
 	//SS = SS_pas + SS_act + SS_pres;
-    SS = phif*(SS_pas) + SS_pres + SS_act;
+    SS = (SS_pas) + SS_pres + SS_act;
 	// Flux and Source terms for the rho and the C
-	//Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
+	Q_rho = -D_rhorho*CCinv*Grad_rho - D_rhoc*rho*CCinv*Grad_c;
 	Q_c = -D_cc*CCinv*Grad_c;
-    Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
-    Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
+    //Q_rho = -3*(D_rhorho-phif*(D_rhorho-D_rhorho/10))*A0*Grad_rho/trA - 3*(D_rhoc-phif*(D_rhoc-D_rhoc/10))*rho*A0*Grad_c/trA;
+    //Q_c = -3*(D_cc-phif*(D_cc-D_cc/10))*A0*Grad_c/trA;
 	double He = 1./(1.+exp(-gamma_theta*(thetaE - vartheta_e)));
 	S_rho = (p_rho + p_rho_c*c/(K_rho_c+c)+p_rho_theta*He)*(1-rho/K_rho_rho)*rho - d_rho*rho;
 	S_c = (p_c_rho*c+ p_c_thetaE*He)*(rho/(K_c_c+c)) - d_c*c;
@@ -2820,7 +2826,7 @@ VectorXd &Re_x,VectorXd &Re_rho,VectorXd &Re_c)
 		VectorXd dThetadrho(6);dThetadrho.setZero();
 		VectorXd dThetadc(6);dThetadc.setZero();
 		//std::cout<<"Local variables before update:\nphif0 = "<<ip_phif_0[ip]<<"\nkappa_0 = "<<ip_kappa_0[ip]<<"\na0_0 = ["<<ip_a0_0[ip](0)<<","<<ip_a0_0[ip](1)<<"]\nlamdaP_0 = ["<<ip_lamdaP_0[ip](0)<<","<<ip_lamdaP_0[ip](1)<<"]\n";
-		localWoundProblem(dt,local_parameters,c,rho,CC,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
+		//localWoundProblem(dt,local_parameters,c,rho,CC,ip_phif_0[ip],ip_a0_0[ip],ip_kappa_0[ip],ip_lamdaP_0[ip],ip_phif[ip],ip_a0[ip],ip_kappa[ip],ip_lamdaP[ip],dThetadCC,dThetadrho,dThetadc);
 		//
 		// rename variables to make it easier
 		double phif_0 = ip_phif_0[ip];

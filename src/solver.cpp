@@ -1156,6 +1156,7 @@ void writeParaview(tissue &myTissue, const char* filename, const char* filename2
     std::vector<Vector2d> node_a0(myTissue.n_node,Vector2d(0,0));
 	std::vector<Vector2d> node_lamdaP(myTissue.n_node,Vector2d(0,0));
     std::vector<Vector2d> node_lamdaE(myTissue.n_node,Vector2d(0,0));
+    std::vector<Vector2d> node_displacement(myTissue.n_node,Vector2d(0,0));
     // TENSORS
     std::vector<Matrix2d> node_strain(myTissue.n_node,Matrix2d::Zero(2,2));
     std::vector<Matrix2d> node_stress(myTissue.n_node,Matrix2d::Zero(2,2));
@@ -1201,6 +1202,8 @@ void writeParaview(tissue &myTissue, const char* filename, const char* filename2
         node_lamdaE[nodei] = node_lamdaE[nodei]/node_ip_count[nodei];
         node_strain[nodei] = node_strain[nodei]/node_ip_count[nodei];
         node_stress[nodei] = node_stress[nodei]/node_ip_count[nodei];
+
+        node_displacement[nodei] = myTissue.node_x[nodei] - myTissue.node_X[nodei];
 	}
 	// Save variables
     savefile<<"\n";
@@ -1216,7 +1219,7 @@ void writeParaview(tissue &myTissue, const char* filename, const char* filename2
     savefile2<<"\nVECTORS lamdaE float\n";
 	for(int i=0;i<myTissue.n_node;i++){
 		savefile<<node_a0[i](0)<<" "<<node_a0[i](1)<<" 0\n";
-        savefile2<<node_lamdaE[i](0)<<" "<<node_lamdaE[i](1)<<" 0\n";
+        savefile2<<node_displacement[i](0)<<" "<<node_displacement[i](1)<<" 0\n";
 	}
     // write out the stress or strain tensors
     savefile<<"\nTENSORS strain float\n";
