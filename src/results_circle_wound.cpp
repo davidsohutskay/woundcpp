@@ -87,7 +87,8 @@ int main(int argc, char *argv[])
         // for normalization
         double t_max = 7*24*2;
         double x_length = 37.5;
-        double rho_phys = 1000.; // [cells/mm^3]
+        double
+        = 1000.; // [cells/mm^3]
         double stress_phys = 0.005;
         double c_max = 1.0e-4; // [g/mm3] from tgf beta review, 5e-5g/mm3 was good for tissues
         //
@@ -269,7 +270,7 @@ int main(int argc, char *argv[])
             else if(distance < 0.3){
                 // transition
                 std::cout<<"transition node "<<nodei<<"\n";
-                node_rho0[nodei] = rho_phys*smoother_step;
+                node_rho0[nodei] = rho_healthy*smoother_step;
                 node_c0[nodei] = c_wound*(1 - smoother_step);
             }
             // else we are outside and already set to healthy values
