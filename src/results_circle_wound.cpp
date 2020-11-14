@@ -269,8 +269,8 @@ int main(int argc, char *argv[])
             else if(distance < 0.3){
                 // transition
                 std::cout<<"transition node "<<nodei<<"\n";
-                node_rho0[nodei] = rho_wound*smoother_step;
-                node_c0[nodei] = c_wound*smoother_step;
+                node_rho0[nodei] = rho_phys*smoother_step;
+                node_c0[nodei] = c_wound*(1 - smoother_step);
             }
             // else we are outside and already set to healthy values
         }
@@ -316,10 +316,10 @@ int main(int argc, char *argv[])
                 else if(distance < 0.3){
                     // transition
                     std::cout<<"IP transition node: "<<IP_size*elemi+ip<<"\n";
-                    ip_phi0[elemi*IP_size+ip] = phif0_wound*smoother_step;
-                    ip_a00[elemi*IP_size+ip] = a0_wound*smoother_step;
-                    ip_kappa0[elemi*IP_size+ip] = kappa0_wound*smoother_step;
-                    ip_lamda0[elemi*IP_size+ip] = lamda0_wound*smoother_step;
+                    ip_phi0[elemi*IP_size+ip] = phif0_healthy*smoother_step;
+                    ip_a00[elemi*IP_size+ip] = a0_wound;
+                    ip_kappa0[elemi*IP_size+ip] = kappa0_wound;
+                    ip_lamda0[elemi*IP_size+ip] = lamda0_wound;
                 }
                 // else we are outside and already set to healthy values
             }
