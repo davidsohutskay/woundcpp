@@ -87,8 +87,7 @@ int main(int argc, char *argv[])
         // for normalization
         double t_max = 7*24*2;
         double x_length = 37.5;
-        double
-        = 1000.; // [cells/mm^3]
+        double rho_phys = 1000.; // [cells/mm^3]
         double stress_phys = 0.005;
         double c_max = 1.0e-4; // [g/mm3] from tgf beta review, 5e-5g/mm3 was good for tissues
         //
