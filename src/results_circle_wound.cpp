@@ -91,10 +91,10 @@ int main(int argc, char *argv[])
         double stress_phys = 0.005;
         double c_max = 1.0e-4; // [g/mm3] from tgf beta review, 5e-5g/mm3 was good for tissues
         //
-        double k0 = 0.0511/stress_phys; // neo hookean for skin, used previously, in MPa
-        double kf = 0.015/stress_phys; // stiffness of collagen in MPa, from previous paper
+        double k0 = 0.0511; // neo hookean for skin, used previously, in MPa
+        double kf = 0.015; // stiffness of collagen in MPa, from previous paper
         double k2 = 0.048; // nonlinear exponential coefficient, non-dimensional
-        double t_rho = 0.005/stress_phys; // 0.0045 force of fibroblasts in MPa, this is per cell. so, in an average sense this is the production by the natural density
+        double t_rho = 0.005; // 0.0045 force of fibroblasts in MPa, this is per cell. so, in an average sense this is the production by the natural density
         double t_rho_c = 10*t_rho; // 0.045 force of myofibroblasts enhanced by chemical, I'm assuming normalized chemical, otherwise I'd have to add a normalizing constant
         double K_t = 0.3; // Saturation of mechanical force by collagen
         double K_t_c = 1/10.; // saturation of chemical on force. this can be calculated from steady state
@@ -130,15 +130,15 @@ int main(int argc, char *argv[])
         //
         //
         // fiber alignment
-        double tau_omega = 100000*10./(K_phi_rho+1); // time constant for angular reorientation, think 100 percent in one year
+        double tau_omega = 1000000*10./(K_phi_rho+1); // time constant for angular reorientation, think 100 percent in one year
         //
         // dispersion parameter
-        double tau_kappa = 100000*1./(K_phi_rho+1); // time constant, on the order of a year
+        double tau_kappa = 1000000*1./(K_phi_rho+1); // time constant, on the order of a year
         double gamma_kappa = 5.; // exponent of the principal stretch ratio
         //
         // permanent contracture/growth
-        double tau_lamdaP_a = 0.05/(K_phi_rho+1); // time constant for direction a, on the order of a year
-        double tau_lamdaP_s = 0.05/(K_phi_rho+1); // time constant for direction s, on the order of a year
+        double tau_lamdaP_a = 1000000*0.05/(K_phi_rho+1); // time constant for direction a, on the order of a year
+        double tau_lamdaP_s = 1000000*0.05/(K_phi_rho+1); // time constant for direction s, on the order of a year
         //
         // solution parameters
         double tol_local = 1e-5; // local tolerance
