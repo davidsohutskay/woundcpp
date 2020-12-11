@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
         std::cout<<"Going to create the mesh\n";
         //std::vector<double> rectangleDimensions = {0.0,75.0,0.0,75.0};
         std::vector<double> rectangleDimensions = {-1.0,1.0,-1.0,1.0};
-        std::vector<int> meshResolution = {38,38};
+        std::vector<int> meshResolution = {40,40};
         QuadMesh myMesh = myRectangleMesh(rectangleDimensions, meshResolution);
         //QuadMesh myMesh = myQuadraticRectangleMesh(rectangleDimensions, meshResolution);
         //QuadMesh myMesh = myMultiBlockMesh(rectangleDimensions, meshResolution);
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
         myTissue.nBC_rho = nBC_rho;
         myTissue.nBC_c = nBC_c;
         myTissue.time_final = 1.0; //24*15;
-        myTissue.time_step = 1.0/354/10; //0.0002;
+        myTissue.time_step = 1.0/40/175; //0.0002;
         myTissue.tol = 1e-8;
         myTissue.max_iter = 25;
         myTissue.n_node = myMesh.n_nodes;
@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
 
         //----------------------------------------------------------//
         // SOLVE
-        sparseWoundSolver(myTissue, filename, 10,save_node,save_ip);
+        sparseWoundSolver(myTissue, filename, 175,save_node,save_ip);
         //----------------------------------------------------------//
     }
 

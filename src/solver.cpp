@@ -182,7 +182,7 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 
 	// LOOP OVER TIME
 	std::cout<<"start loop over time\n";
-	for(int step=0;step<total_steps;step++)
+	for(int step=0;step<total_steps+1;step++)
 	{
 		// GLOBAL NEWTON-RAPHSON ITERATION
 		int iter = 0;
@@ -1216,7 +1216,7 @@ void writeParaview(tissue &myTissue, const char* filename, const char* filename2
     }
 	// write out the fiber direction
 	savefile<<"\nVECTORS a0 float\n";
-    savefile2<<"\nVECTORS lamdaE float\n";
+    savefile2<<"\nVECTORS u float\n";
 	for(int i=0;i<myTissue.n_node;i++){
 		savefile<<node_a0[i](0)<<" "<<node_a0[i](1)<<" 0\n";
         savefile2<<node_displacement[i](0)<<" "<<node_displacement[i](1)<<" 0\n";
