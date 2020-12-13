@@ -545,8 +545,8 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 			writeIP(myTissue,filename_ipi.c_str(),save_ip[ipi],time);
 		}
 
-        time += time_step;
         std::cout<<"End of Newton increments, residual: "<<residuum<<"\nEnd of time step :"<<step<<", \nTime: "<<time<<"\n\n";
+        time += time_step;
 	}
 	// FINISH TIME LOOP
     solver_failed:
