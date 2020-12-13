@@ -172,13 +172,13 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 	double time = myTissue.time;
 	double total_steps = (time_final-time)/time_step;
 	
-	// Save an original configuration file
-	std::stringstream ss;
-	ss << "REF";
-	std::string filename_step = filename + ss.str()+".vtk";
-    std::string filename_step2 = filename + "second_" + ss.str()+".vtk";
-	//std::cout<<"write paraview\n";
-	writeParaview(myTissue,filename_step.c_str(),filename_step2.c_str());
+//	// Save an original configuration file
+//	std::stringstream ss;
+//	ss << "REF";
+//	std::string filename_step = filename + ss.str()+".vtk";
+//    std::string filename_step2 = filename + "second_" + ss.str()+".vtk";
+//	//std::cout<<"write paraview\n";
+//	writeParaview(myTissue,filename_step.c_str(),filename_step2.c_str());
 
 	// LOOP OVER TIME
 	std::cout<<"start loop over time\n";
@@ -456,6 +456,7 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 				}else if(dof_inv_i[0]==1){
 					// rho dof
 					myTissue.node_rho[dof_inv_i[1]] += SOL(dofi);
+
 				}else if(dof_inv_i[0]==2){
 					// C dof
 					myTissue.node_c[dof_inv_i[1]] += SOL(dofi);
@@ -470,30 +471,46 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 		// ADVANCE IN TIME
 		
 		// nodal variables
-		for(int nodei=0;nodei<myTissue.n_node;nodei++)
-		{
-			myTissue.node_rho_0[nodei] = myTissue.node_rho[nodei];
-			myTissue.node_c_0[nodei] = myTissue.node_c[nodei] ;
+		if(step == 0){
+            for(int nodei=0;nodei<myTissue.n_node;nodei++)
+            {
+                myTissue.node_rho[nodei] = myTissue.node_rho_0[nodei];
+                myTissue.node_c[nodei] = myTissue.node_c_0[nodei] ;
+            }
+            // integration point variables
+            for(int elemi=0;elemi<myTissue.n_quadri;elemi++)
+            {
+                for(int IPi=0;IPi<IP_size;IPi++){
+                    myTissue.ip_phif[elemi*IP_size+IPi] = myTissue.ip_phif_0[elemi*IP_size+IPi];
+                    myTissue.ip_a0[elemi*IP_size+IPi] = myTissue.ip_a0_0[elemi*IP_size+IPi];
+                    myTissue.ip_kappa[elemi*IP_size+IPi] = myTissue.ip_kappa_0[elemi*IP_size+IPi];
+                    myTissue.ip_lamdaP[elemi*IP_size+IPi] = myTissue.ip_lamdaP_0[elemi*IP_size+IPi];
+                }
+            }
 		}
-		// integration point variables
-		for(int elemi=0;elemi<myTissue.n_quadri;elemi++)
-		{
-			for(int IPi=0;IPi<IP_size;IPi++){
-				myTissue.ip_phif_0[elemi*IP_size+IPi] = myTissue.ip_phif[elemi*IP_size+IPi];
-				myTissue.ip_a0_0[elemi*IP_size+IPi] = myTissue.ip_a0[elemi*IP_size+IPi];
-				myTissue.ip_kappa_0[elemi*IP_size+IPi] = myTissue.ip_kappa[elemi*IP_size+IPi];
-				myTissue.ip_lamdaP_0[elemi*IP_size+IPi] = myTissue.ip_lamdaP[elemi*IP_size+IPi];
-			}
+		else{
+            for(int nodei=0;nodei<myTissue.n_node;nodei++)
+            {
+                myTissue.node_rho_0[nodei] = myTissue.node_rho[nodei];
+                myTissue.node_c_0[nodei] = myTissue.node_c[nodei] ;
+            }
+            // integration point variables
+            for(int elemi=0;elemi<myTissue.n_quadri;elemi++)
+            {
+                for(int IPi=0;IPi<IP_size;IPi++){
+                    myTissue.ip_phif_0[elemi*IP_size+IPi] = myTissue.ip_phif[elemi*IP_size+IPi];
+                    myTissue.ip_a0_0[elemi*IP_size+IPi] = myTissue.ip_a0[elemi*IP_size+IPi];
+                    myTissue.ip_kappa_0[elemi*IP_size+IPi] = myTissue.ip_kappa[elemi*IP_size+IPi];
+                    myTissue.ip_lamdaP_0[elemi*IP_size+IPi] = myTissue.ip_lamdaP[elemi*IP_size+IPi];
+                }
+            }
 		}
-		
-		time += time_step;
-		std::cout<<"End of Newton increments, residual: "<<residuum<<"\nEnd of time step :"<<step<<", \nTime: "<<time<<"\n\n";
 		
 		// write out a paraview file.
 		if(step%save_freq==0)	
 		{
 			std::stringstream ss;
-			ss << step+1;
+			ss << step;
 			std::string filename_step = filename + ss.str()+".vtk";
             std::string filename_step2 = filename + "second_" + ss.str()+".vtk";
 			std::string filename_step_tissue = filename + ss.str()+".txt";
@@ -528,10 +545,12 @@ void sparseWoundSolver(tissue &myTissue, std::string filename, int save_freq,con
 			writeIP(myTissue,filename_ipi.c_str(),save_ip[ipi],time);
 		}
 
+        time += time_step;
+        std::cout<<"End of Newton increments, residual: "<<residuum<<"\nEnd of time step :"<<step<<", \nTime: "<<time<<"\n\n";
 	}
 	// FINISH TIME LOOP
     solver_failed:
-    std::cout << "\nSolver failed, moving to next sample.\n";
+    std::cout << "\nSolver finished, moving to next sample.\n";
 }
 
 
