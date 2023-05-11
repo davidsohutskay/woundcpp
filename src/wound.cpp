@@ -399,8 +399,8 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 		// magnitude from systems bio
 		double traction_act = (t_rho + t_rho_c*c/(K_t_c + c))*rho;
-		Matrix2d SS_act = (thetaP*traction_act*phif/trA)*A0;
-        //Matrix2d SS_act = (thetaP*traction_act*phif/(trA*(K_t*K_t+phif*phif)))*A0;
+		//Matrix2d SS_act = (thetaP*traction_act*phif/trA)*A0;
+        Matrix2d SS_act = (thetaP*traction_act*phif/(trA*(K_t*K_t+phif*phif)))*A0;
 		// total stress, don't forget the pressure
 		double pressure = -k0*lamda_N*lamda_N;
 		Matrix2d SS_pres = pressure*thetaP*CCinv;
@@ -608,8 +608,8 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 				DDpas(II,JJ) = dSSpasdCC_explicit[ii*8+jj*4+kk*2+ll];
 				
 				// active , explicit only
-				//DDact(II,JJ) = -1.0*phif*traction_act*thetaP/(trA*trA*(K_t*K_t+phif*phif))*dtrAdCC(kk,ll)*A0(ii,jj);
-                DDact(II,JJ) = -1.0*phif*traction_act*thetaP/(trA*trA)*dtrAdCC(kk,ll)*A0(ii,jj);
+				DDact(II,JJ) = -1.0*phif*traction_act*thetaP/(trA*trA*(K_t*K_t+phif*phif))*dtrAdCC(kk,ll)*A0(ii,jj);
+                //DDact(II,JJ) = -1.0*phif*traction_act*thetaP/(trA*trA)*dtrAdCC(kk,ll)*A0(ii,jj);
 				
 				// structural
 				DDstruct(II,JJ) = dSSdphif(ii,jj)*dphifdCC(kk,ll) + dSSda0x(ii,jj)*da0xdCC(kk,ll)+ dSSda0y(ii,jj)*da0ydCC(kk,ll)
@@ -649,15 +649,15 @@ VectorXd &Re_c,MatrixXd &Ke_c_x,MatrixXd &Ke_c_rho,MatrixXd &Ke_c_c)
 		// Derivatives for rho and c
 		//
 		double dtractiondrho = (t_rho + t_rho_c*c/(K_t_c + c));
-		Matrix2d dSSdrho_explicit = (thetaP*dtractiondrho*phif/trA)*(kappa*Identity+(1-2*kappa)*a0a0);
-		// Matrix2d dSSdrho_explicit = (thetaP*dtractiondrho*phif/(trA*(K_t*K_t+phif*phif)))*(kappa*Identity+(1-2*kappa)*a0a0);
+		// Matrix2d dSSdrho_explicit = (thetaP*dtractiondrho*phif/trA)*(kappa*Identity+(1-2*kappa)*a0a0);
+		Matrix2d dSSdrho_explicit = (thetaP*dtractiondrho*phif/(trA*(K_t*K_t+phif*phif)))*(kappa*Identity+(1-2*kappa)*a0a0);
 		Matrix2d dSSdrho = dSSdrho_explicit + dSSdphif*dphifdrho + dSSda0x*da0xdrho + dSSda0y*da0ydrho
 							+dSSdkappa*dkappadrho + dSSdlamdaPa*dlamdaP_adrho + dSSdlamdaPs*dlamdaP_sdrho;
 		Vector3d dSSdrho_voigt(dSSdrho(0,0),dSSdrho(1,1),dSSdrho(0,1));
 		//Matrix2d dsigma_actdc = phif*(t_rho_c/(K_t_c + c)-t_rho_c*c/pow((K_t_c + c),2))*rho*hat_A;
 		double dtractiondc = (t_rho_c/(K_t_c + c) - t_rho_c*c/pow((K_t_c + c),2))*rho;
-		Matrix2d dSSdc_explicit = (thetaP*dtractiondc*phif/trA)*(kappa*Identity+(1-2*kappa)*a0a0);
-        //Matrix2d dSSdc_explicit = (thetaP*dtractiondc*phif/(trA*(K_t*K_t+phif*phif)))*(kappa*Identity+(1-2*kappa)*a0a0);
+		//Matrix2d dSSdc_explicit = (thetaP*dtractiondc*phif/trA)*(kappa*Identity+(1-2*kappa)*a0a0);
+        Matrix2d dSSdc_explicit = (thetaP*dtractiondc*phif/(trA*(K_t*K_t+phif*phif)))*(kappa*Identity+(1-2*kappa)*a0a0);
 		Matrix2d dSSdc = dSSdc_explicit + dSSdphif*dphifdc + dSSda0x*da0xdc + dSSda0y*da0ydc
 							+dSSdkappa*dkappadc + dSSdlamdaPa*dlamdaP_adc + dSSdlamdaPs*dlamdaP_sdc;							
 		Vector3d dSSdc_voigt(dSSdc(0,0),dSSdc(1,1),dSSdc(0,1));
@@ -922,8 +922,8 @@ Matrix2d & SS,Vector2d &Q_rho,double &S_rho, Vector2d &Q_c,double &S_c)
 	Matrix2d SS_pas = thetaP*FFginv*SSe_pas*FFginv;
 	// magnitude from systems bio
 	double traction_act = (t_rho + t_rho_c*c/(K_t_c + c))*rho;
-	Matrix2d SS_act = (thetaP*traction_act*phif/trA)*(kappa*Identity+(1-2*kappa)*a0a0);
-	//Matrix2d SS_act = (thetaP*traction_act*phif/(trA*(K_t*K_t+phif*phif)))*A0;
+	//Matrix2d SS_act = (thetaP*traction_act*phif/trA)*(kappa*Identity+(1-2*kappa)*a0a0);
+	Matrix2d SS_act = (thetaP*traction_act*phif/(trA*(K_t*K_t+phif*phif)))*A0;
 	// total stress, don't forget the pressure
 	double pressure = -k0*lamda_N*lamda_N;
 	Matrix2d SS_pres = pressure*thetaP*CCinv;

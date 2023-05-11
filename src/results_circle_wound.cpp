@@ -79,25 +79,25 @@ int main(int argc, char *argv[])
 //    // Run each set of parameters separately in the loop
 //    readfile.close();
 
-    for(int sample = 1; sample < 11; sample++){
+    for(int sample = 1; sample < 2; sample++){
         //---------------------------------//
         // GLOBAL PARAMETERS
         //
         // for nondimensionalization
         // for normalization
         double t_max = 7*24*2;
-        double x_length = 37.5;
+        double x_length = 50;
         double rho_phys = 1000.; // [cells/mm^3]
-        double stress_phys = 0.005;
+        double stress_phys = 1.0;
         double c_max = 1.0e-4; // [g/mm3] from tgf beta review, 5e-5g/mm3 was good for tissues
         //
         double k0 = 0.0511/stress_phys; // neo hookean for skin, used previously, in MPa
         double kf = 0.015/stress_phys; // stiffness of collagen in MPa, from previous paper
         double k2 = 0.048; // nonlinear exponential coefficient, non-dimensional
-        double K_t = sample*0.1; // Saturation of mechanical force by collagen
-	double scaling = 0.5 / (log(K_t * K_t + 1) - log(K_t * K_t));
-	double t_rho = scaling*0.005/stress_phys; // 0.0045 force of fibroblasts in MPa, this is per cell. so, in an average sense this is the production by the natural density
-        double t_rho_c = 10*t_rho; // 0.045 force of myofibroblasts enhanced by chemical, I'm assuming normalized chemical, otherwise I'd have to add a normalizing constant
+        double K_t = 0.3; // Saturation of mechanical force by collagen
+	    double scaling = 1; //0.5 / (log(K_t * K_t + 1) - log(K_t * K_t));
+	    double t_rho = scaling*0.005/stress_phys; // 0.0045 force of fibroblasts in MPa, this is per cell. so, in an average sense this is the production by the natural density
+        double t_rho_c = 10.*t_rho; // 0.045 force of myofibroblasts enhanced by chemical, I'm assuming normalized chemical, otherwise I'd have to add a normalizing constant
         double K_t_c = 1/10.; // saturation of chemical on force. this can be calculated from steady state
         double D_rhorho = 0.0833*t_max/(x_length*x_length); // diffusion of cells in [mm^2/hour], not normalized
         double D_rhoc = (-1.66e-12/c_max)*t_max/(x_length*x_length); // diffusion of chemotactic gradient, an order of magnitude greater than random walk [mm^2/hour], not normalized
@@ -131,15 +131,15 @@ int main(int argc, char *argv[])
         //
         //
         // fiber alignment
-        double tau_omega = 1000000*10./(K_phi_rho+1); // time constant for angular reorientation, think 100 percent in one year
+        double tau_omega = 100000000*10./(K_phi_rho+1); // time constant for angular reorientation, think 100 percent in one year
         //
         // dispersion parameter
-        double tau_kappa = 1000000*1./(K_phi_rho+1); // time constant, on the order of a year
+        double tau_kappa = 100000000*1./(K_phi_rho+1); // time constant, on the order of a year
         double gamma_kappa = 5.; // exponent of the principal stretch ratio
         //
         // permanent contracture/growth
-        double tau_lamdaP_a = 1.0/(K_phi_rho+1); // time constant for direction a, on the order of a year
-        double tau_lamdaP_s = 1.0/(K_phi_rho+1); // time constant for direction s, on the order of a year
+        double tau_lamdaP_a = 1*1.0/(K_phi_rho+1); // time constant for direction a, on the order of a year
+        double tau_lamdaP_s = 1*1.0/(K_phi_rho+1); // time constant for direction s, on the order of a year
         //
         // solution parameters
         double tol_local = 1e-5; // local tolerance
@@ -156,9 +156,9 @@ int main(int argc, char *argv[])
         double rho_wound = 0; // [cells/mm^3]
         double c_wound = 1.0; //1.0e-4;
         double phif0_wound= 0.01;
-        double kappa0_wound = 0.4;
-        double a0x = frand(0,1.);
-        double a0y = sqrt(1-a0x*a0x);
+        double kappa0_wound = 0.5;
+        double a0x = 1; //frand(0,1.);
+        double a0y = 0; //sqrt(1-a0x*a0x);
         Vector2d a0_wound;a0_wound<<a0x,a0y;
         Vector2d lamda0_wound;lamda0_wound<<1.,1.;
         //---------------------------------//
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
         double rho_healthy = 1.0; //1000; // [cells/mm^3]
         double c_healthy = 0.0;
         double phif0_healthy= 1.;
-        double kappa0_healthy = 0.4;
+        double kappa0_healthy = 0.5;
         Vector2d a0_healthy;a0_healthy<<1.0,0.0;
         a0_wound = a0_healthy;
         Vector2d lamda0_healthy;lamda0_healthy<<1.,1.;
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
         std::cout<<"Going to create the mesh\n";
         //std::vector<double> rectangleDimensions = {0.0,75.0,0.0,75.0};
         std::vector<double> rectangleDimensions = {-1.0,1.0,-1.0,1.0};
-        std::vector<int> meshResolution = {40,40};
+        std::vector<int> meshResolution = {100,100};
         QuadMesh myMesh = myRectangleMesh(rectangleDimensions, meshResolution);
         //QuadMesh myMesh = myQuadraticRectangleMesh(rectangleDimensions, meshResolution);
         //QuadMesh myMesh = myMultiBlockMesh(rectangleDimensions, meshResolution);
@@ -229,8 +229,10 @@ int main(int argc, char *argv[])
         double tol_boundary = 0.01; //0.1;
         double x_center = 0.0; //37.5;
         double y_center = 0.0; //37.5;
-        double x_axis = 0.2; //7.5 + tol_boundary;
-        double y_axis = 0.2; //7.5 + tol_boundary;
+        //double x_axis = 0.15; //7.5 + tol_boundary;
+        //double y_axis = 0.15; //7.5 + tol_boundary;
+        double r_min = 0.15;
+        double r_max = 0.25;
         double alpha_ellipse = 0.;
 
         //std::vector<double> ellipse = {x_center, y_center, x_axis, y_axis, alpha_ellipse};
@@ -255,19 +257,19 @@ int main(int argc, char *argv[])
                 eBC_c.insert   ( std::pair<int,double>(nodei,c_healthy) );
             }
             // check if it is in the center of the wound
-            double check_ellipse = pow((x_coord-x_center)*cos(alpha_ellipse)+(y_coord-y_center)*sin(alpha_ellipse),2)/(x_axis*x_axis) +\
-						pow((x_coord-x_center)*sin(alpha_ellipse)+(y_coord-y_center)*cos(alpha_ellipse),2)/(y_axis*y_axis) ;
+            //double check_ellipse = pow((x_coord-x_center)*cos(alpha_ellipse)+(y_coord-y_center)*sin(alpha_ellipse),2)/(x_axis*x_axis) +\
+			//			pow((x_coord-x_center)*sin(alpha_ellipse)+(y_coord-y_center)*cos(alpha_ellipse),2)/(y_axis*y_axis) ;
             double distance = sqrt(pow((x_coord-x_center),2) + pow((y_coord-y_center),2));
-            double scaled_distance = 5.*(distance - 0.1);
+            double scaled_distance = (1.0/(r_max-r_min))*(distance - r_min);
             double smoother_step = (pow(scaled_distance,3) * (6. * pow(scaled_distance,2) - 15. * scaled_distance + 10.));
             //std::cout << distance << "\n";
-            if(distance < 0.1){ //check_ellipse<=1 distance <= x_axis/2
+            if(distance <= r_min){ //check_ellipse<=1 distance <= x_axis/2
                 // inside
                 std::cout<<"wound node "<<nodei<<"\n";
                 node_rho0[nodei] = rho_wound;
                 node_c0[nodei] = c_wound;
             }
-            else if(distance < 0.3){
+            else if(distance <= r_max){
                 // transition
                 std::cout<<"transition node "<<nodei<<"\n";
                 node_rho0[nodei] = rho_healthy*smoother_step;
@@ -301,12 +303,12 @@ int main(int argc, char *argv[])
 
                 //std::cout<<" IP node " << ip << " reference coordinates: " <<xi<< " " <<eta << " "<<"\n";
                 //std::cout<<"Element " << elemi <<" IP node " << ip << " coordinates: " <<X_IP(0)<< " " <<X_IP(1) << " "<<"\n";
-                double check_ellipse_ip = pow((X_IP(0)-x_center)*cos(alpha_ellipse)+(X_IP(1)-y_center)*sin(alpha_ellipse),2)/(x_axis*x_axis) +\
-                        pow((X_IP(0)-x_center)*sin(alpha_ellipse)+(X_IP(1)-y_center)*cos(alpha_ellipse),2)/(y_axis*y_axis) ;
+                //double check_ellipse_ip = pow((X_IP(0)-x_center)*cos(alpha_ellipse)+(X_IP(1)-y_center)*sin(alpha_ellipse),2)/(x_axis*x_axis) +\
+                //        pow((X_IP(0)-x_center)*sin(alpha_ellipse)+(X_IP(1)-y_center)*cos(alpha_ellipse),2)/(y_axis*y_axis) ;
                 double distance = sqrt(pow((X_IP(0)-x_center),2) + pow((X_IP(1)-y_center),2));
-                double scaled_distance = 5.*(distance - 0.1);
+                double scaled_distance = (1.0/(r_max-r_min))*(distance - r_min);
                 double smoother_step = (pow(scaled_distance,3) * (6. * pow(scaled_distance,2) - 15. * scaled_distance + 10.));
-                if(distance < 0.1){ //check_ellipse<=1 distance <= x_axis/2
+                if(distance <= r_min){ //check_ellipse<=1 distance <= x_axis/2
                     // wound
                     std::cout<<"IP wound node: "<<IP_size*elemi+ip<<"\n";
                     ip_phi0[elemi*IP_size+ip] = phif0_wound;
@@ -314,10 +316,10 @@ int main(int argc, char *argv[])
                     ip_kappa0[elemi*IP_size+ip] = kappa0_wound;
                     ip_lamda0[elemi*IP_size+ip] = lamda0_wound;
                 }
-                else if(distance < 0.3){
+                else if(distance <= r_max){
                     // transition
                     std::cout<<"IP transition node: "<<IP_size*elemi+ip<<"\n";
-                    ip_phi0[elemi*IP_size+ip] = phif0_healthy*smoother_step;
+                    ip_phi0[elemi*IP_size+ip] = phif0_wound + (phif0_healthy-phif0_wound)*smoother_step;
                     ip_a00[elemi*IP_size+ip] = a0_wound;
                     ip_kappa0[elemi*IP_size+ip] = kappa0_wound;
                     ip_lamda0[elemi*IP_size+ip] = lamda0_wound;
@@ -367,7 +369,7 @@ int main(int argc, char *argv[])
         myTissue.nBC_rho = nBC_rho;
         myTissue.nBC_c = nBC_c;
         myTissue.time_final = 1.0; //24*15;
-        myTissue.time_step = 1.0/40/175; //0.0002;
+        myTissue.time_step = 1.0/100/70; // 1.0/40/175
         myTissue.tol = 1e-8;
         myTissue.max_iter = 25;
         myTissue.n_node = myMesh.n_nodes;
@@ -415,7 +417,7 @@ int main(int argc, char *argv[])
 
         //----------------------------------------------------------//
         // SOLVE
-        sparseWoundSolver(myTissue, filename, 175,save_node,save_ip);
+        sparseWoundSolver(myTissue, filename, 70,save_node,save_ip);
         //----------------------------------------------------------//
     }
 
